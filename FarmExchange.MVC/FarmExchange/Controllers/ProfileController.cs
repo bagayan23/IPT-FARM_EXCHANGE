@@ -70,16 +70,16 @@ namespace FarmExchange.Controllers
         public async Task<IActionResult> Edit(Profile model)
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            
+            // Verify the user is editing their own profile
+            if (model.Id != userId)
+            {
+                return Forbid();
+            }
+
             var profile = await _context.Profiles.FindAsync(userId);
 
             if (profile == null) return NotFound();
-
-            // Only allow editing specific fields for now
-            // Excluding Location to prevent sync issues with UserAddress
-
-            // However, the user asked to edit "profile", let's allow Name, Phone, Bio.
-            // Location is complex due to address split, but we can allow editing the SUMMARY string?
-            // No, that would be confusing. Let's stick to Profile fields.
 
             if (ModelState.IsValid)
             {
@@ -90,14 +90,18 @@ namespace FarmExchange.Controllers
                 profile.Phone = model.Phone;
                 profile.Bio = model.Bio;
 
-                // We're not updating Location here because it's derived from Address
-                // If the user wants to update address, that's a separate complex flow.
-                // But for "Edit Profile", Name/Bio/Phone is standard.
-
                 profile.UpdatedAt = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Details", new { id = userId });
+                try
+                {
+                    _context.Profiles.Update(profile);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Details", new { id = userId });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while saving your profile. Please try again.");
+                }
             }
 
             return View(profile);
