@@ -75,33 +75,10 @@ namespace FarmExchange.Controllers
                 profile.MiddleName = model.MiddleName;
                 profile.ExtensionName = model.ExtensionName;
                 profile.Phone = model.Phone;
-                profile.Bio = model.Bio;
 
-                // Update Address
-                var address = profile.Addresses.FirstOrDefault();
-                if (address == null)
-                {
-                    address = new UserAddress { UserID = profile.Id };
-                    _context.UserAddresses.Add(address);
-                }
-
-                // If location fields are provided, update them
-                if (!string.IsNullOrEmpty(region) && !string.IsNullOrEmpty(city) && !string.IsNullOrEmpty(barangay))
-                {
-                    address.UnitNumber = unitNumber;
-                    address.StreetName = streetName;
-                    address.Barangay = barangay;
-                    address.City = city;
-                    address.Province = province;
-                    address.Region = region;
-                    address.PostalCode = postalCode;
-                    address.Country = "Philippines"; // Default
-
-                    // Update Profile.Location summary
-                    profile.Location = string.IsNullOrEmpty(province)
-                        ? $"{barangay}, {city}, {region}"
-                        : $"{barangay}, {city}, {province}";
-                }
+                // We're not updating Location here because it's derived from Address
+                // If the user wants to update address, that's a separate complex flow.
+                // But for "Edit Profile", Name/Phone is standard.
 
                 profile.UpdatedAt = DateTime.UtcNow;
 
