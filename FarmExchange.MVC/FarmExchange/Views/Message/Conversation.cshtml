@@ -9,6 +9,7 @@
 <div class="min-h-screen bg-gray-50 py-8 px-4">
     <div class="max-w-4xl mx-auto">
         <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[80vh]">
+            <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
                 <div class="flex items-center">
                     <a asp-action="Index" class="mr-4 text-gray-500 hover:text-gray-700">
@@ -28,6 +29,7 @@
                 </div>
             </div>
 
+            <!-- Messages Area -->
             <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50" id="messagesContainer">
                 @if (!Model.Any())
                 {
@@ -66,42 +68,56 @@
                                         </p>
                                         <p class="text-sm whitespace-pre-wrap">@message.Content</p>
                                     }
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
 
                                     <div class="mt-2 flex items-center justify-end gap-2">
+=======
+                                    <div class="mt-1 flex items-center justify-end gap-2">
+<<<<<<< HEAD
+>>>>>>> parent of c055c10 (updates)
+=======
+                                    <div class="mt-1 flex items-center justify-end gap-2">
+>>>>>>> parent of c055c10 (updates)
+=======
+>>>>>>> d442f68a5895f249af17ef6394f89cb43ca6e6c6
                                         @if (isMe && !message.IsDeleted)
                                         {
-                                            <div class="flex items-center gap-2">
-                                                <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')" 
-                                                        class="h-8 w-8 flex items-center justify-center text-white bg-white/25 hover:bg-white/40 backdrop-blur-sm transition-all rounded-md shadow-sm" 
-                                                        title="Edit">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div class="flex items-center gap-2 mr-2">
+                                                <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')" class="p-2 text-white bg-white/20 hover:bg-white/30 transition-colors rounded-sm" title="Edit">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                                     </svg>
                                                 </button>
-
                                                 <form asp-action="Delete" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this message?');">
                                                     <input type="hidden" name="id" value="@message.Id" />
-                                                    <button type="submit" 
-                                                            class="h-8 w-8 flex items-center justify-center text-white bg-white/25 hover:bg-white/40 backdrop-blur-sm transition-all rounded-md shadow-sm" 
-                                                            title="Delete">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <button type="submit" class="p-2 text-white bg-white/20 hover:bg-white/30 transition-colors rounded-sm" title="Delete">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
                                                     </button>
                                                 </form>
                                             </div>
                                         }
+<<<<<<< HEAD
+=======
+                                    <div class="mt-1 flex items-center justify-end gap-2">
+>>>>>>> bed7a959adc6ef853f02c03b5b54a2867a00968d
+=======
+>>>>>>> d442f68a5895f249af17ef6394f89cb43ca6e6c6
                                         <span class="text-xs @(isMe ? "text-green-100" : "text-gray-400")">
                                             @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
                                         </span>
                                     </div>
-                                    </div>
+                                </div>
                             </div>
                         </div>
                     }
                 }
             </div>
 
+            <!-- Edit Message Modal -->
             <div id="editMessageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-lg shadow-md max-w-lg w-full p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Message</h3>
@@ -121,6 +137,7 @@
                 </div>
             </div>
 
+            <!-- Compose Area -->
             <div class="p-4 bg-white border-t border-gray-200">
                 <form asp-action="Send" method="post" class="flex flex-col gap-2">
                     @Html.AntiForgeryToken()
@@ -142,6 +159,7 @@
 
 @section Scripts {
     <script>
+        // Scroll to bottom of messages container
         document.addEventListener('DOMContentLoaded', function() {
             var container = document.getElementById('messagesContainer');
             container.scrollTop = container.scrollHeight;
