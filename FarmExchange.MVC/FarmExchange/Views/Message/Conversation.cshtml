@@ -1,0 +1,157 @@
+@using System.Text.Encodings.Web
+@model List<Message>
+@{
+    var currentUser = ViewBag.CurrentUser as Profile;
+    var partner = ViewBag.Partner as Profile;
+    ViewData["Title"] = "Conversation with " + partner.FullName;
+}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[80vh]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <div class="flex items-center">
+                    <a asp-action="Index" class="mr-4 text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                            @partner.FirstName[0]@partner.LastName[0]
+                        </div>
+                        <div class="ml-3">
+                            <h2 class="text-lg font-bold text-gray-900">@partner.FullName</h2>
+                            <p class="text-xs text-gray-500">@partner.UserType</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50" id="messagesContainer">
+                @if (!Model.Any())
+                {
+                    <div class="text-center text-gray-500 py-10">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var message in Model)
+                    {
+                        var isMe = message.SenderId == currentUser.Id;
+                        <div class="group flex @(isMe ? "justify-end" : "justify-start")">
+                            <div class="max-w-[70%] relative">
+                                @if (message.IsEdited && !message.IsDeleted)
+                                {
+                                    <div class="text-[10px] text-gray-400 mb-1 @(isMe ? "text-right" : "text-left")">
+                                        edited
+                                    </div>
+                                }
+
+                                <div class="@(isMe ? "bg-green-600 text-white" : "bg-white text-gray-900 border border-gray-200") rounded-lg px-4 py-3 shadow-sm">
+                                    @if (message.IsDeleted)
+                                    {
+                                        <p class="text-sm italic @(isMe ? "text-green-200" : "text-gray-400")">
+                                            @(isMe ? "You" : message.Sender.FirstName) deleted the message
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-sm font-semibold mb-1 @(isMe ? "text-green-100" : "text-gray-500")">
+                                            @message.Subject
+                                        </p>
+                                        <p class="text-sm whitespace-pre-wrap">@message.Content</p>
+                                    }
+                                    <div class="mt-1 text-xs @(isMe ? "text-green-100" : "text-gray-400") text-right">
+                                        @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
+                                    </div>
+                                </div>
+
+                                @if (isMe && !message.IsDeleted)
+                                {
+                                    <div class="absolute top-0 -left-16 hidden group-hover:flex items-center space-x-1 h-full">
+                                        <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')" class="p-1.5 text-gray-400 hover:text-blue-600 bg-white rounded-full shadow-sm hover:shadow transition-all" title="Edit">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <form asp-action="Delete" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                                            <input type="hidden" name="id" value="@message.Id" />
+                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 bg-white rounded-full shadow-sm hover:shadow transition-all" title="Delete">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Edit Message Modal -->
+            <div id="editMessageModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-md max-w-lg w-full p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Edit Message</h3>
+                    <form asp-action="Edit" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="editMessageId" name="id" />
+                        <textarea id="editMessageContent" name="content" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" required></textarea>
+                        <div class="flex justify-end gap-3">
+                            <button type="button" onclick="closeEditModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-md">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Compose Area -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <form asp-action="Send" method="post" class="flex flex-col gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="recipientId" value="@partner.Id" />
+                    <input type="text" name="subject" placeholder="Subject (Optional)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" />
+                    <div class="flex gap-2">
+                        <textarea name="content" rows="2" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" required></textarea>
+                        <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow transition-colors flex items-center justify-center">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Scroll to bottom of messages container
+        document.addEventListener('DOMContentLoaded', function() {
+            var container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        });
+
+        function editMessage(id, content) {
+            document.getElementById('editMessageId').value = id;
+            document.getElementById('editMessageContent').value = content;
+            document.getElementById('editMessageModal').classList.remove('hidden');
+            document.getElementById('editMessageModal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editMessageModal').classList.add('hidden');
+            document.getElementById('editMessageModal').classList.remove('flex');
+        }
+    </script>
+}
