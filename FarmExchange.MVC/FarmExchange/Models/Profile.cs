@@ -80,5 +80,7 @@ namespace FarmExchange.Models
         public virtual ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
         public virtual ICollection<Transaction> BuyerTransactions { get; set; } = new List<Transaction>();
         public virtual ICollection<Transaction> SellerTransactions { get; set; } = new List<Transaction>();
+
+        public virtual ICollection<UserAddress> Addresses { get; set; } = new List<UserAddress>();
     }
 }

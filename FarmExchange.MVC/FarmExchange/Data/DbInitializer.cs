@@ -71,6 +71,35 @@ namespace FarmExchange.Data
                     CREATE INDEX [IX_Reviews_SellerId] ON [Reviews] ([SellerId]);
                 END";
             context.Database.ExecuteSqlRaw(createReviewsTable);
+
+            // 4. UserAddresses
+            var createUserAddressesTable = @"
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='UserAddresses' AND xtype='U')
+                BEGIN
+                    CREATE TABLE [UserAddresses] (
+                        [AddressID] int IDENTITY(1,1) NOT NULL,
+                        [UserID] uniqueidentifier NOT NULL,
+                        [UnitNumber] nvarchar(50) NULL,
+                        [StreetName] nvarchar(100) NULL,
+                        [Barangay] nvarchar(100) NULL,
+                        [City] nvarchar(100) NULL,
+                        [Province] nvarchar(100) NULL,
+                        [PostalCode] nvarchar(10) NULL,
+                        [Country] nvarchar(50) DEFAULT 'Philippines',
+                        CONSTRAINT [PK_UserAddresses] PRIMARY KEY ([AddressID]),
+                        CONSTRAINT [FK_UserAddresses_Profiles_UserID] FOREIGN KEY ([UserID]) REFERENCES [Profiles] ([Id]) ON DELETE CASCADE
+                    );
+                    CREATE INDEX [IX_UserAddresses_UserID] ON [UserAddresses] ([UserID]);
+                END";
+            context.Database.ExecuteSqlRaw(createUserAddressesTable);
+
+            // 4.1 Update UserAddresses to add Region if not exists
+            var alterUserAddressesTable = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'Region' AND Object_ID = Object_ID(N'UserAddresses'))
+                BEGIN
+                    ALTER TABLE [UserAddresses] ADD [Region] nvarchar(100) NULL;
+                END";
+            context.Database.ExecuteSqlRaw(alterUserAddressesTable);
         }
     }
 }
