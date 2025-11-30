@@ -62,9 +62,6 @@ wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
 wwwroot\uploads\0c394d39-0497-4b1c-9f5a-e852ab46b61f_tomatoes.jpg
-wwwroot\uploads\451ee956-75b0-4d99-b7ae-0346a59c666d_OIP (5).jpg
-wwwroot\uploads\481d8058-0fef-4ba8-99ad-b7c2ba23e6fd_OIP (7).jpg
-wwwroot\uploads\4c59b718-9634-4c2c-8105-2a3761b1a60e_OIP (6).jpg
 wwwroot\uploads\5baa77cc-2208-4382-9f8f-513a95788421_Culpa_20251118_195238_0000 (1)_page-0001.jpg
 wwwroot\uploads\8e8b15da-dbc1-4d16-9d60-715b8a0401f3_tomatoes.jpg
 wwwroot\uploads\a744e0f3-7aa5-4417-be1b-91efa1560f3a_OIP (4).jpg
