@@ -15,15 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< HEAD
-<<<<<<< HEAD
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c055c10e6c6bf3dc695f9aaa85800e9002c08d04")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db3bda3f7cbbb4607fb318ae79a12c1b86a6a08d")]
->>>>>>> parent of c055c10 (updates)
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+db3bda3f7cbbb4607fb318ae79a12c1b86a6a08d")]
->>>>>>> parent of c055c10 (updates)
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+645287b41b1fa24d9dca8eadeb8b509b1c86d5e5")]
 [assembly: System.Reflection.AssemblyProductAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -45,7 +45,8 @@
                         <div class="h-32 w-32 rounded-full border-4 border-white bg-green-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg">
                             @Model.FirstName[0]@Model.LastName[0]
                         </div>
-                        <div class="ml-4 mb-1">
+
+                        <div class="ml-4 mb-1 flex-1">
                             <h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
                             <p class="text-sm text-gray-600">@Model.UserType • Joined @Model.CreatedAt.ToString("MMMM yyyy")</p>
                         </div>
@@ -79,7 +80,7 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-3 space-y-6">
+            <div class="@(Model.UserType == FarmExchange.Models.UserType.Farmer ? "lg:col-span-2" : "lg:col-span-3") space-y-6">
                 @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
                 {
                     <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
@@ -165,21 +166,154 @@
                     }
                 }
             </div>
+
+            @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
+            {
+                <div class="lg:col-span-1 space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Market Suggestions</h2>
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        <p class="text-sm text-gray-500 mb-4">
+                            Based on current nationwide demand in the Philippines.
+                            <span class="text-xs text-green-600 block mt-1 font-medium">Updated daily via Market API</span>
+                        </p>
+
+                        <div id="marketSuggestions" class="space-y-4">
+                             <!-- Loading State -->
+                             <div class="animate-pulse flex space-x-4">
+                                <div class="flex-1 space-y-4 py-1">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 bg-gray-200 rounded"></div>
+                                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    </div>
+                                </div>
+                             </div>
+                             <div class="animate-pulse flex space-x-4">
+                                <div class="flex-1 space-y-4 py-1">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div class="space-y-2">
+                                        <div class="h-4 bg-gray-200 rounded"></div>
+                                        <div class="h-4 bg-gray-200 rounded w-5/6"></div>
+                                    </div>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+            <div class="bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Date</span>
+                    <span class="font-medium text-gray-900" id="receiptDate">Dec 01, 2025</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Time</span>
+                    <span class="font-medium text-gray-900" id="receiptTime">12:00 PM</span>
+                </div>
+                <div class="h-px bg-gray-200 my-2"></div>
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col">
+                        <span class="font-medium text-gray-900" id="receiptItem">Product</span>
+                        <span class="text-xs text-gray-500">
+                            <span id="receiptQty">0</span> x ₱<span id="receiptPrice">0.00</span>/<span id="receiptUnit">kg</span>
+                        </span>
+                    </div>
+                    <span class="font-bold text-gray-900">₱<span id="receiptTotal">0.00</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 pt-0 flex gap-3 print-hidden">
+            <button onclick="window.print()" class="flex-1 flex items-center justify-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print
+            </button>
+            <button onclick="closeReceipt()" class="flex-1 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl transition-colors">
+                Close
+            </button>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        // --- Existing Modal Logic ---
         let autoCloseTimer = null;
         let countdownTimer = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('profileUpdateModal');
-            if (modal) {
-                startAutoClose();
+            if (modal) startAutoClose();
+
+            // Load market suggestions if container exists
+            const suggestionsContainer = document.getElementById('marketSuggestions');
+            if (suggestionsContainer) {
+                fetchSuggestions();
             }
         });
+
+        function fetchSuggestions() {
+            fetch('/api/market/demand')
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('marketSuggestions');
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<p class="text-gray-500 italic text-sm">No market suggestions available at this time.</p>';
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(item => {
+                        let trendIcon = '';
+                        let trendColor = '';
+                        if (item.trend === 'Rising') {
+                            trendIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>';
+                            trendColor = 'text-green-600';
+                        } else if (item.trend === 'Falling') {
+                            trendIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>';
+                            trendColor = 'text-red-600';
+                        } else {
+                            trendIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"></path></svg>';
+                            trendColor = 'text-gray-600';
+                        }
+
+                        let demandColor = 'bg-blue-100 text-blue-800';
+                        if (item.demandLevel === 'High') demandColor = 'bg-red-100 text-red-800';
+                        if (item.demandLevel === 'Medium') demandColor = 'bg-yellow-100 text-yellow-800';
+
+                        html += `
+                            <div class="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h4 class="font-bold text-gray-800">${item.name}</h4>
+                                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full ${demandColor}">
+                                        ${item.demandLevel}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-gray-500 mb-2">${item.description}</p>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="font-medium text-gray-700 bg-gray-100 px-2 py-1 rounded">₱${item.averagePrice.toFixed(2)} / ${item.unit}</span>
+                                    <div class="flex items-center ${trendColor} font-semibold">
+                                        <span class="mr-1">${item.trend}</span>
+                                        ${trendIcon}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    container.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                    const container = document.getElementById('marketSuggestions');
+                    container.innerHTML = '<div class="text-center py-4"><p class="text-red-500 text-sm">Failed to load suggestions.</p><button onclick="fetchSuggestions()" class="mt-2 text-xs text-blue-600 underline">Try Again</button></div>';
+                });
+        }
 
         function startAutoClose() {
             const TOTAL_TIME = 5000; // 60 seconds in milliseconds
@@ -187,6 +321,7 @@
             let elapsedTime = 0;
             const progressBar = document.getElementById('progressBar');
             const countdownElement = document.getElementById('countdown');
+            const mainContainer = document.getElementById('mainContainer');
 
             // Update progress bar and countdown
             countdownTimer = setInterval(function() {
@@ -223,6 +358,126 @@
             // Clear timers
             if (autoCloseTimer) clearTimeout(autoCloseTimer);
             if (countdownTimer) clearInterval(countdownTimer);
+        }
+
+        // --- Filter Logic ---
+        function filterOrders() {
+            const searchInput = document.getElementById('orderSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+            const cards = document.querySelectorAll('.order-card');
+            const noResultsMsg = document.getElementById('noResultsMsg');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                const status = card.getAttribute('data-status');
+                const matchesSearch = title.includes(searchInput);
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+
+                if (matchesSearch && matchesStatus) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            if (visibleCount === 0 && cards.length > 0) {
+                noResultsMsg.classList.remove('hidden');
+            } else if (noResultsMsg) {
+                noResultsMsg.classList.add('hidden');
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('orderSearch').value = '';
+            document.getElementById('statusFilter').value = 'all';
+            filterOrders();
+        }
+
+        // --- Receipt Card Logic ---
+        function showReceipt(btn) {
+            const id = btn.getAttribute('data-id');
+            const date = btn.getAttribute('data-date');
+            const time = btn.getAttribute('data-time');
+            const item = btn.getAttribute('data-item');
+            const price = btn.getAttribute('data-price');
+            const unit = btn.getAttribute('data-unit');
+            const qty = btn.getAttribute('data-qty');
+            const total = btn.getAttribute('data-total');
+            const status = btn.getAttribute('data-status');
+
+            // 1. Set Basic Data
+            document.getElementById('receiptId').textContent = id;
+            document.getElementById('receiptDate').textContent = date;
+            document.getElementById('receiptTime').textContent = time;
+            document.getElementById('receiptItem').textContent = item;
+            document.getElementById('receiptPrice').textContent = price;
+            document.getElementById('receiptUnit').textContent = unit;
+            document.getElementById('receiptQty').textContent = qty;
+            document.getElementById('receiptTotal').textContent = total;
+            document.getElementById('receiptGrandTotal').textContent = total;
+
+            // 2. Handle Header Text, Icon Color, AND SVG Shape
+            const receiptTitle = document.getElementById('receiptTitle');
+            const receiptIcon = document.getElementById('receiptIcon');
+            const receiptIconPath = document.getElementById('receiptIconPath'); // New Target
+
+            // Base icon classes
+            const baseIconClass = "h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm";
+
+            if (status === 'completed') {
+                receiptTitle.textContent = "Payment Successful";
+                receiptIcon.className = baseIconClass + " bg-green-100 text-green-600";
+                // Checkmark path
+                receiptIconPath.setAttribute('d', 'M5 13l4 4L19 7');
+            } else if (status === 'cancelled') {
+                receiptTitle.textContent = "Payment Unsuccessful";
+                receiptIcon.className = baseIconClass + " bg-red-100 text-red-600";
+                // X mark path
+                receiptIconPath.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            } else {
+                receiptTitle.textContent = "Transaction Details";
+                receiptIcon.className = baseIconClass + " bg-yellow-100 text-yellow-600";
+                // Default to checkmark, or could use a clock if desired
+                receiptIconPath.setAttribute('d', 'M5 13l4 4L19 7');
+            }
+
+            // 3. Handle Status Badge
+            const badge = document.getElementById('receiptStatusBadge');
+            badge.textContent = status.toUpperCase();
+
+            badge.className = 'inline-block mt-2 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full';
+            if(status === 'completed') {
+                badge.classList.add('bg-green-100', 'text-green-700');
+            } else if (status === 'cancelled') {
+                badge.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                badge.classList.add('bg-yellow-100', 'text-yellow-700');
+            }
+
+            // 4. Show Modal
+            const modal = document.getElementById('receiptModal');
+            const mainContainer = document.getElementById('mainContainer');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            if(mainContainer) {
+                mainContainer.classList.add('blur-sm');
+            }
+        }
+
+        function closeReceipt() {
+            const modal = document.getElementById('receiptModal');
+            const mainContainer = document.getElementById('mainContainer');
+
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+
+            if(mainContainer) {
+                mainContainer.classList.remove('blur-sm');
+            }
         }
     </script>
 }
