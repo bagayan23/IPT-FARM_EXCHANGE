@@ -115,8 +115,10 @@ namespace FarmExchange.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditThread(Guid id, string title, string content, string category)
+        public async Task<IActionResult> EditThread(Guid id, ForumThread model)
         {
+            if (id != model.Id) return NotFound();
+
             var userId = GetCurrentUserId();
             var thread = await _context.ForumThreads.FindAsync(id);
 
@@ -125,24 +127,23 @@ namespace FarmExchange.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(content))
+            // Remove navigation properties and AuthorId from validation
+            // AuthorId is required in model but not in form (security)
+            ModelState.Remove("Author");
+            ModelState.Remove("AuthorId");
+            ModelState.Remove("Posts");
+
+            if (ModelState.IsValid)
             {
-                thread.Title = title;
-                thread.Content = content;
-                thread.Category = category;
+                thread.Title = model.Title;
+                thread.Content = model.Content;
+                thread.Category = model.Category;
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Thread", new { id = thread.Id });
             }
 
-            // If validation fails, return view with current values to show error (or effectively reload)
-            // Note: In a real app, we'd pass the entered values back.
-            // Here we just ensure we don't crash.
-            // Ideally we'd set ModelState errors if we had a ViewModel.
-            // Since we are changing signature, we don't have 'model' to pass back easily unless we construct it.
-            // But usually the client-side validation catches empty fields first.
-
-            return View(thread);
+            return View(model);
         }
 
         [HttpPost]
