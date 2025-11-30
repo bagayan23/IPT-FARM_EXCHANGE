@@ -97,8 +97,19 @@
                     </div>
                 </div>
 
-                <div class="w-full h-80">
-                    <canvas id="salesChart"></canvas>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">My Sales Revenue ($)</h3>
+                        <div class="w-full h-64">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">Market Trends: Top Items Sold (Qty)</h3>
+                        <div class="w-full h-64">
+                            <canvas id="marketChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         }
@@ -210,6 +221,7 @@
             const endDateInput = document.getElementById('endDate');
             const applyCustomBtn = document.getElementById('applyCustomDate');
             let salesChart = null;
+            let marketChart = null;
 
             if (!periodSelect) return; // Not a farmer or element missing
 
@@ -227,58 +239,87 @@
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
-                        const ctx = document.getElementById('salesChart').getContext('2d');
+                        renderSalesChart(data.personal);
+                        renderMarketChart(data.market);
+                    })
+                    .catch(error => console.error('Error fetching analytics:', error));
+            }
 
-                        // Prepare data
-                        const labels = data.map(item => item.itemName);
-                        const salesData = data.map(item => item.totalSales);
-                        const quantityData = data.map(item => item.totalQuantity);
+            function renderSalesChart(data) {
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                const labels = data.map(item => item.itemName);
+                const salesData = data.map(item => item.totalSales);
 
-                        if (salesChart) {
-                            salesChart.destroy();
-                        }
+                if (salesChart) salesChart.destroy();
 
-                        salesChart = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: 'Total Sales ($)',
-                                    data: salesData,
-                                    backgroundColor: 'rgba(22, 163, 74, 0.6)', // green-600
-                                    borderColor: 'rgba(22, 163, 74, 1)',
-                                    borderWidth: 1
-                                },
-                                {
-                                    label: 'Quantity Sold',
-                                    data: quantityData,
-                                    backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
-                                    borderColor: 'rgba(59, 130, 246, 1)',
-                                    borderWidth: 1,
-                                    hidden: true // Hide by default, user can toggle
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                },
-                                plugins: {
-                                    legend: {
-                                        position: 'top',
-                                    },
-                                    title: {
-                                        display: true,
-                                        text: 'Sales by Item'
+                salesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Revenue ($)',
+                            data: salesData,
+                            backgroundColor: 'rgba(22, 163, 74, 0.6)', // green-600
+                            borderColor: 'rgba(22, 163, 74, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Revenue ($)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return '$' + context.parsed.y.toFixed(2);
                                     }
                                 }
                             }
-                        });
-                    })
-                    .catch(error => console.error('Error fetching analytics:', error));
+                        }
+                    }
+                });
+            }
+
+            function renderMarketChart(data) {
+                const ctx = document.getElementById('marketChart').getContext('2d');
+                const labels = data.map(item => item.itemName);
+                const quantityData = data.map(item => item.totalQuantity);
+
+                if (marketChart) marketChart.destroy();
+
+                marketChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Market Quantity Sold',
+                            data: quantityData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Quantity Sold (Units)' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
             }
 
             // Initial load

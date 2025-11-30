@@ -66,9 +66,12 @@ namespace FarmExchange.Controllers
         public async Task<IActionResult> GetSalesAnalytics(string period, DateTime? startDate, DateTime? endDate)
         {
             var userId = GetCurrentUserId();
-            var query = _context.Transactions
-                .Include(t => t.Harvest)
-                .Where(t => t.SellerId == userId);
+            var profile = await _context.Profiles.FindAsync(userId);
+
+            if (profile == null || profile.UserType != UserType.Farmer)
+            {
+                return Forbid();
+            }
 
             DateTime now = DateTime.UtcNow;
             DateTime filterStartDate = DateTime.MinValue;
@@ -103,16 +106,18 @@ namespace FarmExchange.Controllers
                     break;
             }
 
-            // Ensure endDate includes the whole day if it's just a date (though here it's DateTime)
-            // But if coming from input type="date", it might be midnight.
             if (endDate.HasValue && endDate.Value.TimeOfDay == TimeSpan.Zero)
             {
                  filterEndDate = endDate.Value.AddDays(1).AddTicks(-1);
             }
 
-            query = query.Where(t => t.TransactionDate >= filterStartDate && t.TransactionDate <= filterEndDate);
-
-            var data = await query
+            // 1. Personal Sales Data (Only completed transactions, filtered by SellerId)
+            var personalData = await _context.Transactions
+                .Include(t => t.Harvest)
+                .Where(t => t.SellerId == userId &&
+                            t.Status == "completed" &&
+                            t.TransactionDate >= filterStartDate &&
+                            t.TransactionDate <= filterEndDate)
                 .GroupBy(t => t.Harvest.Title)
                 .Select(g => new
                 {
@@ -122,7 +127,23 @@ namespace FarmExchange.Controllers
                 })
                 .ToListAsync();
 
-            return Json(data);
+            // 2. Market Quantity Data (Only completed transactions, visible to all farmers)
+            var marketData = await _context.Transactions
+                .Include(t => t.Harvest)
+                .Where(t => t.Status == "completed" &&
+                            t.TransactionDate >= filterStartDate &&
+                            t.TransactionDate <= filterEndDate)
+                .GroupBy(t => t.Harvest.Title)
+                .Select(g => new
+                {
+                    ItemName = g.Key,
+                    TotalQuantity = g.Sum(t => t.Quantity)
+                })
+                .OrderByDescending(x => x.TotalQuantity) // Show top selling items
+                .Take(10) // Limit to top 10 items to avoid clutter
+                .ToListAsync();
+
+            return Json(new { personal = personalData, market = marketData });
         }
 
         private Guid GetCurrentUserId()
