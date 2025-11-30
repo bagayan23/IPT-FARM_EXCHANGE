@@ -7,9 +7,9 @@
 }
 
 <div class="min-h-screen bg-gray-50 py-8 px-4">
-    <div class="max-w-7xl mx-auto">
 
-        <!-- Profile Update Success Modal -->
+    <div class="w-full px-4 mx-auto">
+
         @if (!string.IsNullOrEmpty(successMessage))
         {
             <div id="profileUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -22,12 +22,10 @@
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Profile Updated!</h3>
                     <p class="text-gray-600 mb-6">
                         Your profile has been successfully updated.
-                   
+                    </p>
                     <button onclick="closeProfileUpdateModal()" class="mt-8 w-full px-6 py-3 text-base font-medium bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg rounded-lg">
                         Got it!
                     </button>
-                    
-                    <!-- Progress Bar for Auto-close -->
                     <div class="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div id="progressBar" class="h-full bg-green-600 rounded-full" style="width: 100%;"></div>
                     </div>
@@ -36,25 +34,31 @@
             </div>
         }
 
-        <!-- Profile Header -->
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8 w-full">
             <div class="h-32 bg-green-600"></div>
             <div class="px-6 pb-6">
-                <div class="relative flex justify-between items-end -mt-12 mb-4">
+                <div class="relative flex flex-col md:flex-row justify-between items-end -mt-12 mb-4">
                     <div class="flex items-end">
-                        <div class="h-32 w-32 rounded-full border-4 border-white bg-green-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg">
+                        <div class="h-32 w-32 rounded-full border-4 border-white bg-green-600 flex items-center justify-center text-4xl font-bold text-white shadow-lg shrink-0">
                             @Model.FirstName[0]@Model.LastName[0]
                         </div>
                         <div class="ml-4 mb-1">
                             <h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
                             <p class="text-sm text-gray-600">@Model.UserType • Joined @Model.CreatedAt.ToString("MMMM yyyy")</p>
+                            <div class="flex items-center text-gray-600 mt-1">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span class="text-sm">@(string.IsNullOrEmpty(Model.Location) ? "Location not specified" : Model.Location)</span>
+                            </div>
                         </div>
                     </div>
 
                     @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
                     {
-                        <div class="mb-2">
-                             <a asp-controller="Profile" asp-action="Edit" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150">
+                        <div class="mt-4 md:mt-0 md:mb-2">
+                            <a asp-controller="Profile" asp-action="Edit" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none transition ease-in-out duration-150">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                 </svg>
@@ -63,44 +67,99 @@
                         </div>
                     }
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="col-span-2">
-                        <div class="flex items-center text-gray-600 mb-4">
-                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            @(string.IsNullOrEmpty(Model.Location) ? "Location not specified" : Model.Location)
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-3 space-y-6">
-                @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
-                {
+        <div class="w-full">
+            @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
+            {
+                <div class="mb-4 border-b pb-2">
                     <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
-                    @if (activeHarvests.Any())
-                    {
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                            @foreach (var harvest in activeHarvests)
-                            {
-                                <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-lg font-semibold text-gray-900">@harvest.Title</h3>
-                                            <p class="text-sm text-gray-500">@harvest.Category</p>
-                                        </div>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            ₱@harvest.Price.ToString("F2") / @harvest.Unit
-                                        </span>
+                </div>
+
+                @if (activeHarvests.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 w-full">
+                        @foreach (var harvest in activeHarvests)
+                        {
+                            <div class="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow flex flex-col h-full overflow-hidden border border-gray-100">
+                                <div class="h-48 w-full bg-gray-200 relative">
+                                    @if (!string.IsNullOrEmpty(harvest.ImageUrl))
+                                    {
+                                        <img src="@harvest.ImageUrl" alt="@harvest.Title" class="w-full h-full object-cover" />
+                                    }
+                                    else
+                                    {
+                                        <div class="flex items-center justify-center h-full text-4xl">🌱</div>
+                                    }
+                                    <span class="absolute top-2 right-2 px-2 py-1 text-xs font-bold bg-white/90 text-green-700 rounded-full shadow-sm">
+                                        @harvest.Category
+                                    </span>
+                                </div>
+
+                                <div class="p-4 flex flex-col flex-1">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-1 truncate" title="@harvest.Title">@harvest.Title</h3>
+
+                                    <div class="flex items-baseline mb-2">
+                                        <span class="text-xl font-bold text-green-600">₱@harvest.Price.ToString("F2")</span>
+                                        <span class="text-sm text-gray-500 ml-1">/@harvest.Unit</span>
                                     </div>
-                                    <div class="mt-4 flex items-center justify-between">
-                                        <span class="text-sm text-gray-600">@harvest.QuantityAvailable @harvest.Unit available</span>
-                                        <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
+
+                                    <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                            @harvest.QuantityAvailable @harvest.Unit left
+                                        </span>
+                                        <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm hover:underline">
+                                            Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="bg-white rounded-lg p-10 text-center shadow-sm">
+                        <p class="text-gray-500 italic text-lg">No active listings at the moment.</p>
+                    </div>
+                }
+            }
+            else if (Model.UserType == FarmExchange.Models.UserType.Buyer)
+            {
+                @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
+                {
+                    <div class="mb-4 border-b pb-2">
+                        <h2 class="text-2xl font-bold text-gray-900">My Orders</h2>
+                    </div>
+
+                    @if (Model.BuyerTransactions != null && Model.BuyerTransactions.Any())
+                    {
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
+                            @foreach (var order in Model.BuyerTransactions.OrderByDescending(t => t.TransactionDate))
+                            {
+                                <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow border border-gray-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="px-2 py-1 text-xs font-bold rounded-full
+                                                            @(order.Status == "completed" ? "bg-green-100 text-green-800" :
+                                                                                            order.Status == "cancelled" ? "bg-red-100 text-red-800" :
+                                                                                            "bg-yellow-100 text-yellow-800")">
+                                            @order.Status.ToUpper()
+                                        </span>
+                                        <span class="text-xs text-gray-400">@order.TransactionDate.ToString("MMM d")</span>
+                                    </div>
+
+                                    <h4 class="font-bold text-gray-900 truncate mb-1" title="@(order.Harvest?.Title)">
+                                        @(order.Harvest?.Title ?? "Product Unavailable")
+                                    </h4>
+
+                                    <div class="flex justify-between text-sm text-gray-600 mb-3">
+                                        <span>Qty: @order.Quantity</span>
+                                        <span class="font-semibold text-green-700">₱@order.TotalPrice.ToString("F2")</span>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-gray-100 text-center">
+                                        <a href="#" class="text-xs text-gray-500 hover:text-green-600 font-medium">View Receipt</a>
                                     </div>
                                 </div>
                             }
@@ -108,63 +167,12 @@
                     }
                     else
                     {
-                        <p class="text-gray-500 italic">No active listings at the moment.</p>
-                    }
-                }
-                else if (Model.UserType == FarmExchange.Models.UserType.Buyer)
-                {
-                    @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
-                    {
-                        <h2 class="text-2xl font-bold text-gray-900">My Orders</h2>
-                        @if (Model.BuyerTransactions != null && Model.BuyerTransactions.Any())
-                        {
-                            <div class="bg-white shadow overflow-hidden sm:rounded-md">
-                                <ul class="divide-y divide-gray-200">
-                                    @foreach (var order in Model.BuyerTransactions.OrderByDescending(t => t.TransactionDate))
-                                    {
-                                        <li>
-                                            <div class="px-4 py-4 sm:px-6">
-                                                <div class="flex items-center justify-between">
-                                                    <p class="text-sm font-medium text-green-600 truncate">
-                                                        @(order.Harvest?.Title ?? "Product Unavailable")
-                                                    </p>
-                                                    <div class="ml-2 flex-shrink-0 flex">
-                                                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                                            @(order.Status == "completed" ? "bg-green-100 text-green-800" :
-                                                              order.Status == "cancelled" ? "bg-red-100 text-red-800" :
-                                                              "bg-yellow-100 text-yellow-800")">
-                                                            @order.Status
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-2 sm:flex sm:justify-between">
-                                                    <div class="sm:flex">
-                                                        <p class="flex items-center text-sm text-gray-500">
-                                                            Quantity: @order.Quantity
-                                                        </p>
-                                                        <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                                                            Total: ₱@order.TotalPrice.ToString("F2")
-                                                        </p>
-                                                    </div>
-                                                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                                        <p>
-                                                            Ordered on <time datetime="@order.TransactionDate.ToString("yyyy-MM-dd")">@order.TransactionDate.ToString("MMM d, yyyy")</time>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    }
-                                </ul>
-                            </div>
-                        }
-                        else
-                        {
+                        <div class="bg-white rounded-lg p-10 text-center shadow-sm">
                             <p class="text-gray-500 italic">No orders found.</p>
-                        }
+                        </div>
                     }
                 }
-            </div>
+            }
         </div>
     </div>
 </div>
@@ -173,7 +181,7 @@
     <script>
         let autoCloseTimer = null;
         let countdownTimer = null;
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('profileUpdateModal');
             if (modal) {
@@ -182,25 +190,19 @@
         });
 
         function startAutoClose() {
-            const TOTAL_TIME = 5000; // 60 seconds in milliseconds
-            const UPDATE_INTERVAL = 100; // Update every 100ms for smooth animation
+            const TOTAL_TIME = 5000;
+            const UPDATE_INTERVAL = 100;
             let elapsedTime = 0;
             const progressBar = document.getElementById('progressBar');
             const countdownElement = document.getElementById('countdown');
 
-            // Update progress bar and countdown
             countdownTimer = setInterval(function() {
                 elapsedTime += UPDATE_INTERVAL;
                 const percentage = ((TOTAL_TIME - elapsedTime) / TOTAL_TIME) * 100;
                 const secondsRemaining = Math.max(0, Math.ceil((TOTAL_TIME - elapsedTime) / 1000));
-                
-                if (progressBar) {
-                    progressBar.style.width = percentage + '%';
-                }
-                
-                if (countdownElement) {
-                    countdownElement.textContent = secondsRemaining;
-                }
+
+                if (progressBar) progressBar.style.width = percentage + '%';
+                if (countdownElement) countdownElement.textContent = secondsRemaining;
 
                 if (elapsedTime >= TOTAL_TIME) {
                     clearInterval(countdownTimer);
@@ -208,7 +210,6 @@
                 }
             }, UPDATE_INTERVAL);
 
-            // Auto-close after 60 seconds
             autoCloseTimer = setTimeout(function() {
                 closeProfileUpdateModal();
             }, TOTAL_TIME);
@@ -216,11 +217,7 @@
 
         function closeProfileUpdateModal() {
             const modal = document.getElementById('profileUpdateModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-            
-            // Clear timers
+            if (modal) modal.classList.add('hidden');
             if (autoCloseTimer) clearTimeout(autoCloseTimer);
             if (countdownTimer) clearInterval(countdownTimer);
         }
