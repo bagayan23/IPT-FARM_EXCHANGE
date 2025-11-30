@@ -229,6 +229,16 @@ namespace FarmExchange.Controllers
             existingHarvest.Price = harvest.Price;
             existingHarvest.Unit = harvest.Unit;
             existingHarvest.QuantityAvailable = harvest.QuantityAvailable;
+
+            if (existingHarvest.QuantityAvailable > 0 && existingHarvest.Status == "sold_out")
+            {
+                existingHarvest.Status = "available";
+            }
+            else if (existingHarvest.QuantityAvailable == 0)
+            {
+                existingHarvest.Status = "sold_out";
+            }
+
             existingHarvest.HarvestDate = harvest.HarvestDate;
             existingHarvest.UpdatedAt = DateTime.UtcNow;
 
