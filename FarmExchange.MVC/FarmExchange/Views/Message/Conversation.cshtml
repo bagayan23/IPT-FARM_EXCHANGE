@@ -60,6 +60,9 @@
                                     }
                                     else
                                     {
+                                        <p class="text-xs font-bold mb-1 @(isMe ? "text-white" : "text-green-600")">
+                                            @(isMe ? "You" : message.Sender.FullName)
+                                        </p>
                                         <p class="text-sm font-semibold mb-1 @(isMe ? "text-green-100" : "text-gray-500")">
                                             @message.Subject
                                         </p>
