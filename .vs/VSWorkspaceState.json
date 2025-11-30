@@ -7,10 +7,9 @@
     "\\FarmExchange.MVC\\SQL",
     "\\FarmExchange.MVC\\ViewModels",
     "\\FarmExchange.MVC\\Views",
-    "\\FarmExchange.MVC\\Views\\Home",
-    "\\IPT-FARM_EXCHANGE-main\\IPT Project",
-    "\\IPT-FARM_EXCHANGE-main\\IPT Project\\src"
+    "\\FarmExchange.MVC\\Views\\Dashboard",
+    "\\FarmExchange.MVC\\Views\\Home"
   ],
-  "SelectedNode": "\\FarmExchange.MVC\\Views\\Home\\Index.cshtml",
+  "SelectedNode": "\\FarmExchange.MVC\\ViewModels\\LoginViewModel.cs",
   "PreviewInSolutionExplorer": false
 }
