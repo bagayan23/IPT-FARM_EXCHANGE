@@ -33,24 +33,6 @@ namespace FarmExchange.Controllers
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync();
 
-            // Fetch reviews where this user is the seller
-            var reviews = await _context.Reviews
-                .Include(r => r.Buyer)
-                .Where(r => r.SellerId == id)
-                .OrderByDescending(r => r.CreatedAt)
-                .ToListAsync();
-
-            ViewBag.Reviews = reviews;
-
-            // Calculate stats
-            double averageRating = 0;
-            if (reviews.Any())
-            {
-                averageRating = reviews.Average(r => r.Rating);
-            }
-            ViewBag.AverageRating = averageRating;
-            ViewBag.ReviewCount = reviews.Count;
-
             return View(profile);
         }
 
