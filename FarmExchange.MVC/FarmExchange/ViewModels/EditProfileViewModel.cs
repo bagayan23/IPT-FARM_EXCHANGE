@@ -4,6 +4,8 @@ namespace FarmExchange.ViewModels
 {
     public class EditProfileViewModel
     {
+        public Guid Id { get; set; }
+
         [Required]
         [StringLength(50)]
         [Display(Name = "Last Name")]

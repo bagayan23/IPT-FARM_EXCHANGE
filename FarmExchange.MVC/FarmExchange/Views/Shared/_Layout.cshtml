@@ -44,7 +44,7 @@
                     </nav>
 
                     <div class="hidden md:flex items-center space-x-4">
-                        <a asp-controller="Profile" asp-action="Edit" class="text-sm text-gray-700 hover:text-green-600 font-semibold" title="Edit Profile">
+                        <a asp-controller="Profile" asp-action="Details" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" class="text-sm text-gray-700 hover:text-green-600 font-semibold" title="View Profile">
                             @User.Identity.Name
                         </a>
 

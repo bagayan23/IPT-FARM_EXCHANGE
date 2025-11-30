@@ -22,18 +22,7 @@
                     <h3 class="text-2xl font-bold text-gray-900 mb-2">Profile Updated!</h3>
                     <p class="text-gray-600 mb-6">
                         Your profile has been successfully updated.
-                    </p>
-                    <div class="space-y-3">
-                        <p class="text-sm text-green-600 font-medium">
-                            ✓ All changes saved
-                        </p>
-                        <p class="text-sm text-green-600 font-medium">
-                            ✓ Profile is live
-                        </p>
-                        <p class="text-sm text-green-600 font-medium">
-                            ✓ Ready to use
-                        </p>
-                    </div>
+                   
                     <button onclick="closeProfileUpdateModal()" class="mt-8 w-full px-6 py-3 text-base font-medium bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg rounded-lg">
                         Got it!
                     </button>
@@ -42,7 +31,7 @@
                     <div class="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
                         <div id="progressBar" class="h-full bg-green-600 rounded-full" style="width: 100%;"></div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">This will close automatically in <span id="countdown">60</span>s</p>
+                    <p class="text-xs text-gray-500 mt-2">This will close automatically in <span id="countdown">5</span>s</p>
                 </div>
             </div>
         }
@@ -110,7 +99,7 @@
                                 </div>
                                 <div class="mt-4 flex items-center justify-between">
                                     <span class="text-sm text-gray-600">@harvest.QuantityAvailable @harvest.Unit available</span>
-                                    <a asp-controller="Harvest" asp-action="Details" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
+                                    <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
                                 </div>
                             </div>
                         }
@@ -138,7 +127,7 @@
         });
 
         function startAutoClose() {
-            const TOTAL_TIME = 60000; // 60 seconds in milliseconds
+            const TOTAL_TIME = 5000; // 60 seconds in milliseconds
             const UPDATE_INTERVAL = 100; // Update every 100ms for smooth animation
             let elapsedTime = 0;
             const progressBar = document.getElementById('progressBar');

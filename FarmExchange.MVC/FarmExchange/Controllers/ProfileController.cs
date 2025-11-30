@@ -52,6 +52,7 @@ namespace FarmExchange.Controllers
 
             var viewModel = new EditProfileViewModel
             {
+                Id = profile.Id,
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 MiddleName = profile.MiddleName,
@@ -77,58 +78,65 @@ namespace FarmExchange.Controllers
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
 
-            
             // Verify the user is editing their own profile
             if (model.Id != userId)
             {
                 return Forbid();
             }
 
-            var profile = await _context.Profiles.FindAsync(userId);
-
+            var profile = await _context.Profiles
+                .Include(p => p.Addresses)
+                .FirstOrDefaultAsync(p => p.Id == userId);
 
             if (profile == null) return NotFound();
 
             if (ModelState.IsValid)
             {
-
-                // 1. Update Profile Info
-                profile.FirstName = model.FirstName;
-                profile.LastName = model.LastName;
-                profile.MiddleName = model.MiddleName;
-                profile.ExtensionName = model.ExtensionName;
-                profile.Phone = model.Phone;
-
-                // 2. Update Address if requested
-                if (model.UpdateAddress)
+                try
                 {
-                    // Clear existing addresses (Simplification: User has 1 address)
-                    // Or find the first one
-                    var address = profile.Addresses.FirstOrDefault();
-                    if (address == null)
+                    // 1. Update Profile Info
+                    profile.FirstName = model.FirstName;
+                    profile.LastName = model.LastName;
+                    profile.MiddleName = model.MiddleName;
+                    profile.ExtensionName = model.ExtensionName;
+                    profile.Phone = model.Phone;
+
+                    // 2. Update Address if requested
+                    if (model.UpdateAddress)
                     {
-                        address = new UserAddress { UserID = userId };
-                        _context.UserAddresses.Add(address);
+                        var address = profile.Addresses.FirstOrDefault();
+                        if (address == null)
+                        {
+                            address = new UserAddress { UserID = userId };
+                            _context.UserAddresses.Add(address);
+                        }
+
+                        address.UnitNumber = model.UnitNumber;
+                        address.StreetName = model.StreetName;
+                        address.Barangay = model.Barangay;
+                        address.City = model.City;
+                        address.Province = model.Province;
+                        address.Region = model.Region;
+                        address.PostalCode = model.PostalCode;
+
+                        // Update Legacy Location String
+                        profile.Location = string.IsNullOrEmpty(model.Province)
+                            ? $"{model.Barangay}, {model.City}, {model.Region}"
+                            : $"{model.Barangay}, {model.City}, {model.Province}";
                     }
 
-                    address.UnitNumber = model.UnitNumber;
-                    address.StreetName = model.StreetName;
-                    address.Barangay = model.Barangay;
-                    address.City = model.City;
-                    address.Province = model.Province;
-                    address.Region = model.Region;
-                    address.PostalCode = model.PostalCode;
+                    profile.UpdatedAt = DateTime.UtcNow;
 
-                    // Update Legacy Location String
-                    profile.Location = string.IsNullOrEmpty(model.Province)
-                        ? $"{model.Barangay}, {model.City}, {model.Region}"
-                        : $"{model.Barangay}, {model.City}, {model.Province}";
+                    _context.Profiles.Update(profile);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Profile updated successfully!";
+                    return RedirectToAction("Details", new { id = userId });
                 }
-
-                profile.UpdatedAt = DateTime.UtcNow;
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Details", new { id = userId });
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "An error occurred while saving your profile. Please try again.";
+                    ModelState.AddModelError("", "An error occurred while saving your profile. Please try again.");
+                }
             }
 
             return View(model);
