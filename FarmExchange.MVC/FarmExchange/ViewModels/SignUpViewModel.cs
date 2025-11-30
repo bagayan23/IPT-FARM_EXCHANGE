@@ -58,7 +58,10 @@ namespace FarmExchange.ViewModels
         [Display(Name = "Street Name")]
         public string? StreetName { get; set; }
 
-        [Required(ErrorMessage = "Province is required")]
+        [Required(ErrorMessage = "Region is required")]
+        [StringLength(100)]
+        public string? Region { get; set; }
+
         [StringLength(100)]
         public string? Province { get; set; }
 

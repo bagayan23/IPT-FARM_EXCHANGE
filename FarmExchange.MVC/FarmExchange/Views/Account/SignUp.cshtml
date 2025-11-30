@@ -94,13 +94,24 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <div>
+                        <label asp-for="Region" class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                        <select id="regionSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                            <option value="">Select Region</option>
+                        </select>
+                        <input type="hidden" asp-for="Region" id="hiddenRegion" />
+                        <span asp-validation-for="Region" class="text-sm text-red-500"></span>
+                    </div>
+                     <div>
                         <label asp-for="Province" class="block text-sm font-medium text-gray-700 mb-1"></label>
-                        <select id="provinceSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <select id="provinceSelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" disabled>
                             <option value="">Select Province</option>
                         </select>
                         <input type="hidden" asp-for="Province" id="hiddenProvince" />
                         <span asp-validation-for="Province" class="text-sm text-red-500"></span>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <div>
                         <label asp-for="City" class="block text-sm font-medium text-gray-700 mb-1"></label>
                         <select id="citySelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" disabled>
@@ -109,10 +120,7 @@
                         <input type="hidden" asp-for="City" id="hiddenCity" />
                         <span asp-validation-for="City" class="text-sm text-red-500"></span>
                     </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
+                     <div>
                         <label asp-for="Barangay" class="block text-sm font-medium text-gray-700 mb-1"></label>
                         <select id="barangaySelect" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" disabled>
                             <option value="">Select Barangay</option>
@@ -120,6 +128,9 @@
                         <input type="hidden" asp-for="Barangay" id="hiddenBarangay" />
                         <span asp-validation-for="Barangay" class="text-sm text-red-500"></span>
                     </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label asp-for="PostalCode" class="block text-sm font-medium text-gray-700 mb-1"></label>
                         <input asp-for="PostalCode" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="1000" />
@@ -149,10 +160,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const regionSelect = document.getElementById('regionSelect');
             const provinceSelect = document.getElementById('provinceSelect');
             const citySelect = document.getElementById('citySelect');
             const barangaySelect = document.getElementById('barangaySelect');
 
+            const hiddenRegion = document.getElementById('hiddenRegion');
             const hiddenProvince = document.getElementById('hiddenProvince');
             const hiddenCity = document.getElementById('hiddenCity');
             const hiddenBarangay = document.getElementById('hiddenBarangay');
@@ -160,85 +173,129 @@
             // API Base URL
             const API_BASE = 'https://psgc.gitlab.io/api';
 
-            // Fetch Provinces
-            fetch(`${API_BASE}/provinces/`)
+            // 1. Fetch Regions
+            fetch(`${API_BASE}/regions/`)
                 .then(response => response.json())
                 .then(data => {
-                    // Manually add Metro Manila (NCR)
-                    data.push({
-                        code: '130000000',
-                        name: 'Metro Manila'
-                    });
-
-                    data.sort((a, b) => a.name.localeCompare(b.name));
-                    data.forEach(province => {
+                    // Sort regions by name or code if preferred.
+                    // PSGC usually returns them in a standard order, but sorting by name is safer for UX.
+                    // However, regions like "Region I", "Region II" sort weirdly alphabetically.
+                    // Let's rely on default order or sort by name.
+                    // data.sort((a, b) => a.name.localeCompare(b.name));
+                    data.forEach(region => {
                         const option = document.createElement('option');
-                        option.value = province.code;
-                        option.textContent = province.name;
-                        provinceSelect.appendChild(option);
+                        option.value = region.code;
+                        option.textContent = region.name + (region.regionName ? ` (${region.regionName})` : '');
+                        regionSelect.appendChild(option);
                     });
                 })
-                .catch(error => console.error('Error fetching provinces:', error));
+                .catch(error => console.error('Error fetching regions:', error));
 
-            // On Province Change
+            // 2. On Region Change
+            regionSelect.addEventListener('change', function() {
+                const regionCode = this.value;
+                const regionName = this.options[this.selectedIndex].text;
+
+                hiddenRegion.value = regionCode ? regionName.split(' (')[0] : ''; // Simple cleanup
+
+                // Reset ALL dependent fields
+                provinceSelect.innerHTML = '<option value="">Select Province</option>';
+                provinceSelect.disabled = true;
+                hiddenProvince.value = '';
+
+                citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                citySelect.disabled = true;
+                hiddenCity.value = '';
+
+                barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                barangaySelect.disabled = true;
+                hiddenBarangay.value = '';
+
+                if (regionCode) {
+                    // Fetch Provinces for the Region
+                    fetch(`${API_BASE}/regions/${regionCode}/provinces/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.length > 0) {
+                                // Has Provinces
+                                provinceSelect.disabled = false;
+                                data.sort((a, b) => a.name.localeCompare(b.name));
+                                data.forEach(province => {
+                                    const option = document.createElement('option');
+                                    option.value = province.code;
+                                    option.textContent = province.name;
+                                    provinceSelect.appendChild(option);
+                                });
+                            } else {
+                                // No Provinces (e.g., NCR)
+                                // Enable City Select immediately and fetch cities from Region
+                                fetchCities(regionCode, true);
+
+                                // Set Province to "N/A" or the Region Name for data consistency
+                                // Use Region Name to satisfy [Required] or expectation
+                                hiddenProvince.value = hiddenRegion.value;
+                            }
+                        })
+                        .catch(error => console.error('Error fetching provinces:', error));
+                }
+            });
+
+            // 3. On Province Change
             provinceSelect.addEventListener('change', function() {
                 const provinceCode = this.value;
                 const provinceName = this.options[this.selectedIndex].text;
 
                 hiddenProvince.value = provinceCode ? provinceName : '';
 
-                // Reset dependent fields
+                // Reset Cities and Barangays
                 citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
                 citySelect.disabled = true;
+                hiddenCity.value = '';
+
                 barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
                 barangaySelect.disabled = true;
-                hiddenCity.value = '';
                 hiddenBarangay.value = '';
 
                 if (provinceCode) {
-                    citySelect.disabled = false;
-
-                    // Determine endpoint based on whether it is NCR or a regular province
-                    let url = '';
-                    if (provinceCode === '130000000') {
-                        // Endpoint for NCR (Region)
-                        url = `${API_BASE}/regions/${provinceCode}/cities-municipalities/`;
-                    } else {
-                        // Endpoint for regular provinces
-                        url = `${API_BASE}/provinces/${provinceCode}/cities-municipalities/`;
-                    }
-
-                    // Fetch Cities/Municipalities
-                    fetch(url)
-                        .then(response => response.json())
-                        .then(data => {
-                            data.sort((a, b) => a.name.localeCompare(b.name));
-                            data.forEach(city => {
-                                const option = document.createElement('option');
-                                option.value = city.code;
-                                option.textContent = city.name;
-                                citySelect.appendChild(option);
-                            });
-                        })
-                        .catch(error => console.error('Error fetching cities:', error));
+                    fetchCities(provinceCode, false);
                 }
             });
 
-            // On City Change
+            // Helper function to fetch cities
+            function fetchCities(code, isRegion) {
+                citySelect.disabled = false;
+                const endpoint = isRegion
+                    ? `${API_BASE}/regions/${code}/cities-municipalities/`
+                    : `${API_BASE}/provinces/${code}/cities-municipalities/`;
+
+                fetch(endpoint)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.sort((a, b) => a.name.localeCompare(b.name));
+                        data.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.code;
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error fetching cities:', error));
+            }
+
+            // 4. On City Change
             citySelect.addEventListener('change', function() {
                 const cityCode = this.value;
                 const cityName = this.options[this.selectedIndex].text;
 
                 hiddenCity.value = cityCode ? cityName : '';
 
-                // Reset dependent fields
+                // Reset Barangays
                 barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
                 barangaySelect.disabled = true;
                 hiddenBarangay.value = '';
 
                 if (cityCode) {
                     barangaySelect.disabled = false;
-                    // Fetch Barangays
                     fetch(`${API_BASE}/cities-municipalities/${cityCode}/barangays/`)
                         .then(response => response.json())
                         .then(data => {
@@ -254,7 +311,7 @@
                 }
             });
 
-            // On Barangay Change
+            // 5. On Barangay Change
             barangaySelect.addEventListener('change', function() {
                 const barangayName = this.options[this.selectedIndex].text;
                 hiddenBarangay.value = this.value ? barangayName : '';

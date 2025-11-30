@@ -25,6 +25,9 @@ namespace FarmExchange.Models
         [StringLength(100)]
         public string? Province { get; set; }
 
+        [StringLength(100)]
+        public string? Region { get; set; }
+
         [StringLength(10)]
         public string? PostalCode { get; set; }
 
