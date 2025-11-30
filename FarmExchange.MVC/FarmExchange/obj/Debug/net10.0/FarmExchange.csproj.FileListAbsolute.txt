@@ -436,7 +436,6 @@ C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExc
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\FarmExchange.pdb
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\FarmExchange.genruntimeconfig.cache
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\ref\FarmExchange.dll
-C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\t7ylc27u4q-{0}-yw9pw4xqle-yw9pw4xqle.gz
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\yq5f7bvfvc-{0}-t1cqhe9u97-t1cqhe9u97.gz
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\ao7dw69dud-{0}-sejl45xvog-sejl45xvog.gz
