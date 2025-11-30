@@ -70,6 +70,7 @@ wwwroot\uploads\dfc195c0-11c6-42d1-945d-0beffd27c91f_OIP (2).jpg
 wwwroot\uploads\f0d0a370-06ea-4b16-9a51-4fcae8b19963_OIP (1).jpg
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\css\site.css
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\favicon.ico
+C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\js\site.js
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\bootstrap\dist\css\bootstrap-grid.min.css
@@ -128,5 +129,4 @@ C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExc
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\jquery\dist\jquery.slim.js
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\jquery\dist\jquery.slim.min.js
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\jquery\dist\jquery.slim.min.map
-C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\js\site.js
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\wwwroot\lib\jquery\LICENSE.txt
