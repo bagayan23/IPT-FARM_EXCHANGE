@@ -58,13 +58,29 @@ namespace FarmExchange.Controllers
 
                     UserType = model.UserType,
                     Phone = model.Phone,
-                    Location = model.Location,
+                    Location = $"{model.Barangay}, {model.City}, {model.Province}", // Store summary in Location
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
 
                 _context.Profiles.Add(profile);
                 await _context.SaveChangesAsync();
+
+                // --- SAVE ADDRESS ---
+                var address = new UserAddress
+                {
+                    UserID = profile.Id,
+                    UnitNumber = model.UnitNumber,
+                    StreetName = model.StreetName,
+                    Barangay = model.Barangay,
+                    City = model.City,
+                    Province = model.Province,
+                    PostalCode = model.PostalCode,
+                    Country = "Philippines"
+                };
+                _context.UserAddresses.Add(address);
+                await _context.SaveChangesAsync();
+                // --------------------
 
                 return RedirectToAction("Login");
             }
