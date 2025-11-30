@@ -1,0 +1,37 @@
+@model FarmExchange.Models.ForumPost
+
+@{
+    ViewData["Title"] = "Edit Reply";
+}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-3xl mx-auto">
+        <div class="mb-8">
+            <a asp-action="Thread" asp-route-id="@Model.ThreadId" class="text-green-600 hover:text-green-800 font-medium flex items-center mb-4">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Discussion
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900">Edit Reply</h1>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <form asp-action="EditPost" method="post" class="p-6">
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                    <textarea name="content" rows="8" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" required>@Model.Content</textarea>
+                </div>
+
+                <div class="flex items-center justify-end space-x-4">
+                    <a asp-action="Thread" asp-route-id="@Model.ThreadId" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</a>
+                    <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
