@@ -86,6 +86,18 @@ namespace FarmExchange.Data
                     ALTER TABLE [Profiles] DROP COLUMN [Bio];
                 END";
             context.Database.ExecuteSqlRaw(dropBioColumn);
+
+            // 6. Update Messages table to add IsDeleted and IsEdited
+            var updateMessagesTable = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'IsDeleted' AND Object_ID = Object_ID(N'Messages'))
+                BEGIN
+                    ALTER TABLE [Messages] ADD [IsDeleted] bit NOT NULL DEFAULT 0;
+                END
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'IsEdited' AND Object_ID = Object_ID(N'Messages'))
+                BEGIN
+                    ALTER TABLE [Messages] ADD [IsEdited] bit NOT NULL DEFAULT 0;
+                END";
+            context.Database.ExecuteSqlRaw(updateMessagesTable);
         }
     }
 }
