@@ -14,7 +14,6 @@ namespace FarmExchange.Data
         public DbSet<Harvest> Harvests { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Review> Reviews { get; set; }
         public DbSet<ForumThread> ForumThreads { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
         public DbSet<UserAddress> UserAddresses { get; set; }
@@ -100,25 +99,6 @@ namespace FarmExchange.Data
 
                 entity.HasOne(e => e.Seller)
                     .WithMany(p => p.SellerTransactions)
-                    .HasForeignKey(e => e.SellerId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            // --- 5. REVIEWS CONFIGURATION ---
-            modelBuilder.Entity<Review>(entity =>
-            {
-                entity.ToTable("Reviews");
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BuyerId);
-                entity.HasIndex(e => e.SellerId);
-
-                entity.HasOne(e => e.Buyer)
-                    .WithMany() // Assuming no nav property back
-                    .HasForeignKey(e => e.BuyerId)
-                    .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes of users
-
-                entity.HasOne(e => e.Seller)
-                    .WithMany()
                     .HasForeignKey(e => e.SellerId)
                     .OnDelete(DeleteBehavior.Restrict);
             });

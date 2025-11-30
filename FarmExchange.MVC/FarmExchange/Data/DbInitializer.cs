@@ -50,28 +50,6 @@ namespace FarmExchange.Data
                 END";
             context.Database.ExecuteSqlRaw(createPostsTable);
 
-            // 3. Reviews
-            var createReviewsTable = @"
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Reviews' AND xtype='U')
-                BEGIN
-                    CREATE TABLE [Reviews] (
-                        [Id] uniqueidentifier NOT NULL,
-                        [BuyerId] uniqueidentifier NOT NULL,
-                        [SellerId] uniqueidentifier NOT NULL,
-                        [TransactionId] uniqueidentifier NULL,
-                        [Rating] int NOT NULL,
-                        [Comment] nvarchar(1000) NULL,
-                        [CreatedAt] datetime2 NOT NULL,
-                        CONSTRAINT [PK_Reviews] PRIMARY KEY ([Id]),
-                        CONSTRAINT [FK_Reviews_Profiles_BuyerId] FOREIGN KEY ([BuyerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
-                        CONSTRAINT [FK_Reviews_Profiles_SellerId] FOREIGN KEY ([SellerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
-                        CONSTRAINT [FK_Reviews_Transactions_TransactionId] FOREIGN KEY ([TransactionId]) REFERENCES [Transactions] ([Id])
-                    );
-                    CREATE INDEX [IX_Reviews_BuyerId] ON [Reviews] ([BuyerId]);
-                    CREATE INDEX [IX_Reviews_SellerId] ON [Reviews] ([SellerId]);
-                END";
-            context.Database.ExecuteSqlRaw(createReviewsTable);
-
             // 4. UserAddresses
             var createUserAddressesTable = @"
                 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='UserAddresses' AND xtype='U')
