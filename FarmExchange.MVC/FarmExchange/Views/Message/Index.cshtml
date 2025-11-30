@@ -145,5 +145,34 @@
             document.getElementById('composeModal').classList.add('hidden');
             document.getElementById('composeModal').classList.remove('flex');
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var recipientId = @Json.Serialize(ViewBag.RecipientId);
+            var subject = @Json.Serialize(ViewBag.Subject);
+
+            if (recipientId) {
+                openComposeModal();
+                var select = document.getElementById('recipientId');
+                if (select) {
+                    // Try direct assignment first
+                    select.value = recipientId;
+
+                    // If not selected (e.g. case mismatch), try case-insensitive search
+                    if (select.value === "") {
+                        for (var i = 0; i < select.options.length; i++) {
+                            if (select.options[i].value.toLowerCase() === recipientId.toLowerCase()) {
+                                select.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var subjectInput = document.getElementById('subject');
+                if (subjectInput && subject) {
+                    subjectInput.value = subject;
+                }
+            }
+        });
     </script>
 }

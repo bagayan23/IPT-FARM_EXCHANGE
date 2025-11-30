@@ -17,7 +17,7 @@ namespace FarmExchange.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(Guid? recipientId = null, string? subject = null)
         {
             var userId = GetCurrentUserId();
             var profile = await _context.Profiles.FindAsync(userId);
@@ -46,6 +46,9 @@ namespace FarmExchange.Controllers
             ViewBag.Farmers = await _context.Profiles
                 .Where(p => p.UserType == UserType.Farmer)
                 .ToListAsync();
+
+            ViewBag.RecipientId = recipientId;
+            ViewBag.Subject = subject;
 
             return View(allMessages);
         }
