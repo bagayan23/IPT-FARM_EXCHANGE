@@ -32,7 +32,8 @@ namespace FarmExchange.Controllers
                     h.Title.Contains(search) ||
                     h.Description!.Contains(search) ||
                     h.User.LastName.Contains(search) ||
-                    h.User.FirstName.Contains(search));
+                    h.User.FirstName.Contains(search) ||
+                    h.User.Location!.Contains(search));
             }
 
             if (!string.IsNullOrEmpty(category) && category != "all")
