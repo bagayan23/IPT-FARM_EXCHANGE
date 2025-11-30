@@ -22,6 +22,8 @@ namespace FarmExchange.Controllers
             var profile = await _context.Profiles
                 .Include(p => p.Harvests)
                 .Include(p => p.Addresses) // Include addresses for display
+                .Include(p => p.BuyerTransactions)
+                    .ThenInclude(t => t.Harvest)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
@@ -30,10 +32,17 @@ namespace FarmExchange.Controllers
             }
 
             // Fetch active harvests (available)
-            ViewBag.ActiveHarvests = await _context.Harvests
-                .Where(h => h.UserId == id && h.Status == "available")
-                .OrderByDescending(h => h.CreatedAt)
-                .ToListAsync();
+            if (profile.UserType == UserType.Farmer)
+            {
+                ViewBag.ActiveHarvests = await _context.Harvests
+                    .Where(h => h.UserId == id && h.Status == "available")
+                    .OrderByDescending(h => h.CreatedAt)
+                    .ToListAsync();
+            }
+            else
+            {
+                ViewBag.ActiveHarvests = new List<Harvest>();
+            }
 
             return View(profile);
         }
