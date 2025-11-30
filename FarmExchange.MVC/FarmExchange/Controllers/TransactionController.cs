@@ -54,6 +54,19 @@ namespace FarmExchange.Controllers
             ViewBag.Profile = profile;
             ViewBag.Filter = filter ?? "all";
 
+            // If user is Buyer, fetch Seller Ratings
+            if (profile.UserType == UserType.Buyer)
+            {
+                var sellerIds = transactions.Select(t => t.SellerId).Distinct().ToList();
+                var ratings = await _context.Reviews
+                    .Where(r => sellerIds.Contains(r.SellerId))
+                    .GroupBy(r => r.SellerId)
+                    .Select(g => new { SellerId = g.Key, Average = g.Average(r => r.Rating) })
+                    .ToDictionaryAsync(x => x.SellerId, x => x.Average);
+
+                ViewBag.SellerRatings = ratings;
+            }
+
             var stats = new
             {
                 Total = transactions.Count,
