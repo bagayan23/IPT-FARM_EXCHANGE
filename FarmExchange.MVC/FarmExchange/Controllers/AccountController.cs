@@ -130,11 +130,11 @@ namespace FarmExchange.Controllers
 
                     if (user.UserType == UserType.Farmer)
                     {
-                        return RedirectToAction("Manage", "Harvest");
+                        return RedirectToAction("Index", "Dashboard");
                     }
                     else
                     {
-                        return RedirectToAction("Browse", "Harvest");
+                        return RedirectToAction("Index", "Dashboard");
                     }
                 }
 
