@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FarmExchange</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center cursor-pointer">
+                    <a asp-controller="@(User.Identity.IsAuthenticated ? "Dashboard" : "Home")" asp-action="Index" class="flex items-center">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 20V10M12 20h5M12 20H7M12 10a5 5 0 0 1 5-5c0 3-5 5-5 5zm0 0a5 5 0 0 0-5-5c0 3 5 5 5 5z" />
+                        </svg>
+                        <div class="ml-2">
+                            <h1 class="text-xl font-bold text-gray-900">FarmExchange</h1>
+                            <p style="margin-top:-15px " class="text-xs text-gray-500">Connect. Share. Grow.</p>
+                        </div>
+                    </a>
+                </div>
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <nav class="hidden md:flex items-center space-x-8">
+                        <a asp-controller="Dashboard" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Dashboard</a>
+                        <a asp-controller="Harvest" asp-action="Browse" class="text-sm font-medium text-gray-700 hover:text-green-600">Browse</a>
+                        <a asp-controller="Message" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Messages</a>
+                    </nav>
+
+                    <div class="hidden md:flex items-center space-x-4">
+                        <span class="text-sm text-gray-700">@User.Identity.Name</span>
+
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                            <button type="submit" class="px-3 py-1.5 text-sm font-medium bg-transparent hover:bg-gray-50 text-gray-700 border-2 border-gray-300 rounded-lg">
+                                Sign Out
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <nav class="hidden md:flex items-center space-x-8">
+                        <a asp-controller="Home" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Home</a>
+                        <a href="#about" class="text-sm font-medium text-gray-700 hover:text-green-600">About</a>
+                        <a href="#how-it-works" class="text-sm font-medium text-gray-700 hover:text-green-600">How It Works</a>
+                        <a href="#contact" class="text-sm font-medium text-gray-700 hover:text-green-600">Contact</a>
+                    </nav>
+
+                    <div class="hidden md:flex items-center space-x-4">
+                        <a asp-controller="Account" asp-action="Login" class="px-3 py-1.5 text-sm font-medium bg-transparent hover:bg-gray-50 text-gray-700 border-2 border-gray-300 rounded-lg">Login</a>
+                        <a asp-controller="Account" asp-action="SignUp" class="px-5 py-2.5 text-base font-medium bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg rounded-lg">Sign Up</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <script src="~/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
