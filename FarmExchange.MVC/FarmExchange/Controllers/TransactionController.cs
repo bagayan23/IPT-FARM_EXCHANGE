@@ -123,47 +123,6 @@ namespace FarmExchange.Controllers
         }
         // --- UPDATED METHOD ENDS HERE ---
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LeaveReview(Guid transactionId, int rating, string comment)
-        {
-            var userId = GetCurrentUserId();
-            var transaction = await _context.Transactions
-                .Include(t => t.Seller)
-                .FirstOrDefaultAsync(t => t.Id == transactionId);
-
-            if (transaction == null || transaction.BuyerId != userId || transaction.Status != "completed")
-            {
-                return RedirectToAction("Index"); // Invalid request
-            }
-
-            // Check if review already exists
-            var existingReview = await _context.Reviews
-                .FirstOrDefaultAsync(r => r.TransactionId == transactionId);
-
-            if (existingReview != null)
-            {
-                // Optionally handle update
-                return RedirectToAction("Index");
-            }
-
-            var review = new Review
-            {
-                Id = Guid.NewGuid(),
-                BuyerId = userId,
-                SellerId = transaction.SellerId,
-                TransactionId = transactionId,
-                Rating = rating,
-                Comment = comment,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Reviews.Add(review);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction("Index");
-        }
-
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

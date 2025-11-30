@@ -50,27 +50,34 @@ namespace FarmExchange.Data
                 END";
             context.Database.ExecuteSqlRaw(createPostsTable);
 
-            // 3. Reviews
-            var createReviewsTable = @"
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Reviews' AND xtype='U')
+            // 4. UserAddresses
+            var createUserAddressesTable = @"
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='UserAddresses' AND xtype='U')
                 BEGIN
-                    CREATE TABLE [Reviews] (
-                        [Id] uniqueidentifier NOT NULL,
-                        [BuyerId] uniqueidentifier NOT NULL,
-                        [SellerId] uniqueidentifier NOT NULL,
-                        [TransactionId] uniqueidentifier NULL,
-                        [Rating] int NOT NULL,
-                        [Comment] nvarchar(1000) NULL,
-                        [CreatedAt] datetime2 NOT NULL,
-                        CONSTRAINT [PK_Reviews] PRIMARY KEY ([Id]),
-                        CONSTRAINT [FK_Reviews_Profiles_BuyerId] FOREIGN KEY ([BuyerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
-                        CONSTRAINT [FK_Reviews_Profiles_SellerId] FOREIGN KEY ([SellerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
-                        CONSTRAINT [FK_Reviews_Transactions_TransactionId] FOREIGN KEY ([TransactionId]) REFERENCES [Transactions] ([Id])
+                    CREATE TABLE [UserAddresses] (
+                        [AddressID] int IDENTITY(1,1) NOT NULL,
+                        [UserID] uniqueidentifier NOT NULL,
+                        [UnitNumber] nvarchar(50) NULL,
+                        [StreetName] nvarchar(100) NULL,
+                        [Barangay] nvarchar(100) NULL,
+                        [City] nvarchar(100) NULL,
+                        [Province] nvarchar(100) NULL,
+                        [PostalCode] nvarchar(10) NULL,
+                        [Country] nvarchar(50) DEFAULT 'Philippines',
+                        CONSTRAINT [PK_UserAddresses] PRIMARY KEY ([AddressID]),
+                        CONSTRAINT [FK_UserAddresses_Profiles_UserID] FOREIGN KEY ([UserID]) REFERENCES [Profiles] ([Id]) ON DELETE CASCADE
                     );
-                    CREATE INDEX [IX_Reviews_BuyerId] ON [Reviews] ([BuyerId]);
-                    CREATE INDEX [IX_Reviews_SellerId] ON [Reviews] ([SellerId]);
+                    CREATE INDEX [IX_UserAddresses_UserID] ON [UserAddresses] ([UserID]);
                 END";
-            context.Database.ExecuteSqlRaw(createReviewsTable);
+            context.Database.ExecuteSqlRaw(createUserAddressesTable);
+
+            // 4.1 Update UserAddresses to add Region if not exists
+            var alterUserAddressesTable = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'Region' AND Object_ID = Object_ID(N'UserAddresses'))
+                BEGIN
+                    ALTER TABLE [UserAddresses] ADD [Region] nvarchar(100) NULL;
+                END";
+            context.Database.ExecuteSqlRaw(alterUserAddressesTable);
         }
     }
 }

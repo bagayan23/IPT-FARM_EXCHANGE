@@ -1,0 +1,95 @@
+@model FarmExchange.Models.Profile
+
+@{
+    ViewData["Title"] = Model.FullName;
+    var activeHarvests = ViewBag.ActiveHarvests as List<Harvest> ?? new List<Harvest>();
+}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Profile Header -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="h-32 bg-green-600"></div>
+            <div class="px-6 pb-6">
+                <div class="relative flex justify-between items-end -mt-12 mb-4">
+                    <div class="flex items-end">
+                        <div class="h-24 w-24 rounded-full border-4 border-white bg-gray-200 flex items-center justify-center text-3xl font-bold text-gray-500">
+                            @Model.FirstName[0]@Model.LastName[0]
+                        </div>
+                        <div class="ml-4 mb-1">
+                            <h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
+                            <p class="text-sm text-gray-600">@Model.UserType • Joined @Model.CreatedAt.ToString("MMMM yyyy")</p>
+                        </div>
+                    </div>
+
+                    @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
+                    {
+                        <div class="mb-2">
+                             <a asp-controller="Profile" asp-action="Edit" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue active:text-gray-800 active:bg-gray-50 transition ease-in-out duration-150">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                                Edit Profile
+                            </a>
+                        </div>
+                    }
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="col-span-2">
+                        @if (!string.IsNullOrEmpty(Model.Bio))
+                        {
+                            <div class="mb-4">
+                                <h2 class="text-lg font-semibold text-gray-900 mb-2">About</h2>
+                                <p class="text-gray-600">@Model.Bio</p>
+                            </div>
+                        }
+
+                        <div class="flex items-center text-gray-600 mb-4">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            @(string.IsNullOrEmpty(Model.Location) ? "Location not specified" : Model.Location)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Active Harvests -->
+            <div class="lg:col-span-3 space-y-6">
+                <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
+                @if (activeHarvests.Any())
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach (var harvest in activeHarvests)
+                        {
+                            <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-900">@harvest.Title</h3>
+                                        <p class="text-sm text-gray-500">@harvest.Category</p>
+                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        ₱@harvest.Price.ToString("F2") / @harvest.Unit
+                                    </span>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">@harvest.QuantityAvailable @harvest.Unit available</span>
+                                    <a asp-controller="Harvest" asp-action="Details" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-gray-500 italic">No active listings at the moment.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

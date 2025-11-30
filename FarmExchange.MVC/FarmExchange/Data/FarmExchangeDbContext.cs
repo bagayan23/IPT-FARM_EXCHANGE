@@ -14,9 +14,9 @@ namespace FarmExchange.Data
         public DbSet<Harvest> Harvests { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
-        public DbSet<Review> Reviews { get; set; }
         public DbSet<ForumThread> ForumThreads { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
+        public DbSet<UserAddress> UserAddresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -103,25 +103,6 @@ namespace FarmExchange.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // --- 5. REVIEWS CONFIGURATION ---
-            modelBuilder.Entity<Review>(entity =>
-            {
-                entity.ToTable("Reviews");
-                entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.BuyerId);
-                entity.HasIndex(e => e.SellerId);
-
-                entity.HasOne(e => e.Buyer)
-                    .WithMany() // Assuming no nav property back
-                    .HasForeignKey(e => e.BuyerId)
-                    .OnDelete(DeleteBehavior.Restrict); // Prevent cascading deletes of users
-
-                entity.HasOne(e => e.Seller)
-                    .WithMany()
-                    .HasForeignKey(e => e.SellerId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
             // --- 6. FORUM CONFIGURATION ---
             modelBuilder.Entity<ForumThread>(entity =>
             {
@@ -149,6 +130,18 @@ namespace FarmExchange.Data
                     .WithMany()
                     .HasForeignKey(e => e.AuthorId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // --- 7. USER ADDRESSES CONFIGURATION ---
+            modelBuilder.Entity<UserAddress>(entity =>
+            {
+                entity.ToTable("UserAddresses");
+                entity.HasKey(e => e.AddressID);
+
+                entity.HasOne<Profile>()
+                    .WithMany(p => p.Addresses)
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
