@@ -229,13 +229,24 @@ namespace FarmExchange.Controllers
 
             if (harvest != null && harvest.UserId == userId)
             {
+                // 1. Delete the Image File from the server (Keep your existing logic)
                 if (!string.IsNullOrEmpty(harvest.ImageUrl))
                 {
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", harvest.ImageUrl.TrimStart('/'));
                     if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
                 }
 
+                // --- FIX STARTS HERE ---
+                // 2. Find all transactions related to this harvest
+                var relatedTransactions = _context.Transactions.Where(t => t.HarvestId == id);
+
+                // 3. Delete those transactions first
+                _context.Transactions.RemoveRange(relatedTransactions);
+                // --- FIX ENDS HERE ---
+
+                // 4. Now it is safe to delete the Harvest
                 _context.Harvests.Remove(harvest);
+
                 await _context.SaveChangesAsync();
             }
 

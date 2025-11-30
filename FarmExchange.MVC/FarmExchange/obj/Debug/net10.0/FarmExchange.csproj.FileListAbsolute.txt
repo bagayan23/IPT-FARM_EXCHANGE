@@ -393,7 +393,6 @@ C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExc
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\scopedcss\bundle\FarmExchange.styles.css
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\scopedcss\projectbundle\FarmExchange.bundle.scp.css
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\8jpsolkdla-{0}-iw0ruh9pgp-iw0ruh9pgp.gz
-C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\t7ylc27u4q-{0}-61n19gt1b8-61n19gt1b8.gz
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\g636upw7ky-{0}-xtxxf3hu2r-xtxxf3hu2r.gz
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\yq5f7bvfvc-{0}-bqjiyaj88i-bqjiyaj88i.gz
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\xx83pf204i-{0}-c2jlpeoesf-c2jlpeoesf.gz
@@ -467,3 +466,5 @@ C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExc
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\FarmExchange.pdb
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\FarmExchange.genruntimeconfig.cache
 C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\ref\FarmExchange.dll
+C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
+C:\Users\wilms\source\repos\bagayan23\IPT-FARM_EXCHANGE\FarmExchange.MVC\FarmExchange\obj\Debug\net10.0\compressed\t7ylc27u4q-{0}-yw9pw4xqle-yw9pw4xqle.gz
