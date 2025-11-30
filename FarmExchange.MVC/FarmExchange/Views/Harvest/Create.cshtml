@@ -38,6 +38,7 @@
                         <select id="Unit" name="Unit" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" required>
                             <option value="kg">Kilogram (kg)</option>
                             <option value="lb">Pound (lb)</option>
+                            <option value="g">Gram (g)</option>
                             <option value="bunch">Bunch</option>
                             <option value="dozen">Dozen</option>
                             <option value="piece">Piece</option>
@@ -92,3 +93,35 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const unitSelect = document.getElementById('Unit');
+        const quantityInput = document.getElementById('QuantityAvailable');
+
+        function updateQuantityStep() {
+            const unit = unitSelect.value;
+            // Decimal allowed for: kg, lb, g
+            if (['kg', 'lb', 'g'].includes(unit)) {
+                quantityInput.step = '0.01';
+                quantityInput.placeholder = '0.00';
+            } else {
+                // Whole numbers only for: bunch, dozen, piece
+                quantityInput.step = '1';
+                quantityInput.placeholder = '0';
+
+                // If current value is decimal, round it or warn?
+                // For now, just truncating on next input or leaving it to validation.
+                // But let's try to fix it immediately if user switches unit.
+                if (quantityInput.value && !Number.isInteger(parseFloat(quantityInput.value))) {
+                     quantityInput.value = Math.floor(parseFloat(quantityInput.value));
+                }
+            }
+        }
+
+        unitSelect.addEventListener('change', updateQuantityStep);
+
+        // Run on load in case of browser auto-fill
+        updateQuantityStep();
+    </script>
+}

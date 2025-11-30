@@ -161,8 +161,19 @@
             document.getElementById('modalTitle').textContent = 'Purchase ' + title;
             document.getElementById('modalPrice').textContent = 'Price: ₱' + price.toFixed(2) + '/' + unit;
             document.getElementById('modalAvailable').textContent = 'Available: ' + available + ' ' + unit;
-            document.getElementById('quantity').value = '1';
-            document.getElementById('quantity').max = available;
+
+            const quantityInput = document.getElementById('quantity');
+
+            // Set step based on unit
+            if (['kg', 'lb', 'g'].includes(unit)) {
+                quantityInput.step = '0.01';
+                quantityInput.value = '1'; // Default
+            } else {
+                quantityInput.step = '1';
+                quantityInput.value = '1'; // Default
+            }
+
+            quantityInput.max = available;
             updateTotal();
             document.getElementById('purchaseModal').classList.remove('hidden');
             document.getElementById('purchaseModal').classList.add('flex');
