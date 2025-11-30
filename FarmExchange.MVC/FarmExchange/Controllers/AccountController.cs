@@ -58,7 +58,9 @@ namespace FarmExchange.Controllers
 
                     UserType = model.UserType,
                     Phone = model.Phone,
-                    Location = $"{model.Barangay}, {model.City}, {model.Province}", // Store summary in Location
+                    Location = string.IsNullOrEmpty(model.Province)
+                        ? $"{model.Barangay}, {model.City}, {model.Region}"
+                        : $"{model.Barangay}, {model.City}, {model.Province}",
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -75,6 +77,7 @@ namespace FarmExchange.Controllers
                     Barangay = model.Barangay,
                     City = model.City,
                     Province = model.Province,
+                    Region = model.Region,
                     PostalCode = model.PostalCode,
                     Country = "Philippines"
                 };
