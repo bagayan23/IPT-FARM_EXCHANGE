@@ -1,4 +1,5 @@
-@model FarmExchange.Models.Profile
+@using FarmExchange.ViewModels
+@model EditProfileViewModel
 
 @{
     ViewData["Title"] = "Edit Profile";
@@ -8,21 +9,22 @@
     <div class="max-w-3xl mx-auto">
         <div class="mb-8">
             <h1 class="text-3xl font-bold text-gray-900">Edit Profile</h1>
-            <p class="text-gray-600 mt-2">Update your personal information.</p>
+            <p class="text-gray-600 mt-2">Update your personal information and address.</p>
         </div>
 
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <form asp-action="Edit" method="post" class="p-6">
                 <div asp-validation-summary="ModelOnly" class="text-red-500 mb-4"></div>
 
+                <!-- Personal Info -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label asp-for="FirstName" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <label asp-for="FirstName" class="block text-sm font-medium text-gray-700 mb-2"></label>
                         <input asp-for="FirstName" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" required />
                         <span asp-validation-for="FirstName" class="text-red-500 text-sm"></span>
                     </div>
                     <div>
-                        <label asp-for="LastName" class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                        <label asp-for="LastName" class="block text-sm font-medium text-gray-700 mb-2"></label>
                         <input asp-for="LastName" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" required />
                         <span asp-validation-for="LastName" class="text-red-500 text-sm"></span>
                     </div>
@@ -30,23 +32,104 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label asp-for="MiddleName" class="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
+                        <label asp-for="MiddleName" class="block text-sm font-medium text-gray-700 mb-2"></label>
                         <input asp-for="MiddleName" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" />
                     </div>
                     <div>
-                        <label asp-for="ExtensionName" class="block text-sm font-medium text-gray-700 mb-2">Extension Name</label>
+                        <label asp-for="ExtensionName" class="block text-sm font-medium text-gray-700 mb-2"></label>
                         <input asp-for="ExtensionName" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Jr., Sr." />
                     </div>
                 </div>
 
                 <div class="mb-6">
-                    <label asp-for="Phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <label asp-for="Phone" class="block text-sm font-medium text-gray-700 mb-2"></label>
                     <input asp-for="Phone" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" />
                     <span asp-validation-for="Phone" class="text-red-500 text-sm"></span>
                 </div>
 
-                <div class="flex items-center justify-end space-x-4">
-                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@Model.Id" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</a>
+                <!-- Bio Removed -->
+
+                <!-- Address Section -->
+                <div class="border-t pt-6 mt-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Address</h2>
+
+                    <div class="bg-gray-50 p-4 rounded-md mb-4">
+                        <p class="text-sm text-gray-600 mb-2 font-medium">Current Address:</p>
+                        <p class="text-gray-800">
+                            @if (!string.IsNullOrEmpty(Model.Province) || !string.IsNullOrEmpty(Model.Region))
+                            {
+                                var parts = new List<string?> { Model.UnitNumber, Model.StreetName, Model.Barangay, Model.City, Model.Province, Model.Region, Model.PostalCode };
+                                @string.Join(", ", parts.Where(p => !string.IsNullOrEmpty(p)))
+                            }
+                            else
+                            {
+                                <span class="italic text-gray-500">No address on file.</span>
+                            }
+                        </p>
+                    </div>
+
+                    <div class="flex items-center mb-4">
+                        <input asp-for="UpdateAddress" type="checkbox" id="toggleAddress" class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                        <label for="toggleAddress" class="ml-2 block text-sm text-gray-900">
+                            Update Address?
+                        </label>
+                    </div>
+
+                    <div id="addressFields" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label asp-for="UnitNumber" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                                <input asp-for="UnitNumber" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Unit 123, Block 1" />
+                            </div>
+                            <div>
+                                <label asp-for="StreetName" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                                <input asp-for="StreetName" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Main St." />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Region</label>
+                                <select id="regionSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                    <option value="">Select Region</option>
+                                </select>
+                                <input type="hidden" asp-for="Region" id="hiddenRegion" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                                <select id="provinceSelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" disabled>
+                                    <option value="">Select Province</option>
+                                </select>
+                                <input type="hidden" asp-for="Province" id="hiddenProvince" />
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">City/Municipality</label>
+                                <select id="citySelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" disabled>
+                                    <option value="">Select City/Municipality</option>
+                                </select>
+                                <input type="hidden" asp-for="City" id="hiddenCity" />
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Barangay</label>
+                                <select id="barangaySelect" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" disabled>
+                                    <option value="">Select Barangay</option>
+                                </select>
+                                <input type="hidden" asp-for="Barangay" id="hiddenBarangay" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label asp-for="PostalCode" class="block text-sm font-medium text-gray-700 mb-1"></label>
+                            <input asp-for="PostalCode" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="1000" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-4 mt-6">
+                    <a href="javascript:history.back()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</a>
                     <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md">
                         Save Changes
                     </button>
@@ -61,6 +144,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const toggleAddress = document.getElementById('toggleAddress');
+            const addressFields = document.getElementById('addressFields');
+
+            toggleAddress.addEventListener('change', function() {
+                if (this.checked) {
+                    addressFields.classList.remove('hidden');
+                } else {
+                    addressFields.classList.add('hidden');
+                }
+            });
+
+            // PSGC API Logic (Same as SignUp)
             const regionSelect = document.getElementById('regionSelect');
             const provinceSelect = document.getElementById('provinceSelect');
             const citySelect = document.getElementById('citySelect');
@@ -71,29 +166,7 @@
             const hiddenCity = document.getElementById('hiddenCity');
             const hiddenBarangay = document.getElementById('hiddenBarangay');
 
-            // API Base URL
             const API_BASE = 'https://psgc.gitlab.io/api';
-
-            // Function to auto-select option based on hidden value
-            function autoSelect(selectElement, hiddenValue) {
-                if (!hiddenValue) return;
-                // Match by text content because our hidden values are names, not codes
-                for (let i = 0; i < selectElement.options.length; i++) {
-                    // Try exact match or partial match (e.g. "Region I (Ilocos Region)" vs "Region I")
-                    const optionText = selectElement.options[i].text;
-
-                    // Simple logic: if option contains the hidden value, or hidden value contains option text (normalized)
-                    // The hidden values are stored names (e.g. "Pangasinan"). The options are "Pangasinan".
-                    // Region is trickier: "Region I" vs "Region I (Ilocos Region)".
-
-                    if (optionText === hiddenValue || optionText.startsWith(hiddenValue + ' (') || hiddenValue.startsWith(optionText)) {
-                        selectElement.selectedIndex = i;
-                        // selectElement.value will be the Code
-                        return selectElement.value;
-                    }
-                }
-                return null;
-            }
 
             // 1. Fetch Regions
             fetch(`${API_BASE}/regions/`)
@@ -105,38 +178,32 @@
                         option.textContent = region.name + (region.regionName ? ` (${region.regionName})` : '');
                         regionSelect.appendChild(option);
                     });
-
-                    // Auto-select Region
-                    const selectedCode = autoSelect(regionSelect, hiddenRegion.value);
-                    if (selectedCode) {
-                        // Trigger change manually to load provinces
-                        loadProvinces(selectedCode, hiddenProvince.value, hiddenCity.value, hiddenBarangay.value);
-                    }
                 })
                 .catch(error => console.error('Error fetching regions:', error));
 
-            // Load Provinces Logic
-            function loadProvinces(regionCode, savedProvince, savedCity, savedBarangay) {
-                // Reset ALL dependent fields if not just loading
-                if (!savedProvince) {
-                    provinceSelect.innerHTML = '<option value="">Select Province</option>';
-                    provinceSelect.disabled = true;
-                    hiddenProvince.value = '';
+            // 2. On Region Change
+            regionSelect.addEventListener('change', function() {
+                const regionCode = this.value;
+                const regionName = this.options[this.selectedIndex].text;
 
-                    citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
-                    citySelect.disabled = true;
-                    hiddenCity.value = '';
+                hiddenRegion.value = regionCode ? regionName.split(' (')[0] : '';
 
-                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
-                    barangaySelect.disabled = true;
-                    hiddenBarangay.value = '';
-                }
+                provinceSelect.innerHTML = '<option value="">Select Province</option>';
+                provinceSelect.disabled = true;
+                hiddenProvince.value = '';
+
+                citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                citySelect.disabled = true;
+                hiddenCity.value = '';
+
+                barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                barangaySelect.disabled = true;
+                hiddenBarangay.value = '';
 
                 if (regionCode) {
                     fetch(`${API_BASE}/regions/${regionCode}/provinces/`)
                         .then(response => response.json())
                         .then(data => {
-                            provinceSelect.innerHTML = '<option value="">Select Province</option>'; // Clear old options
                             if (data.length > 0) {
                                 provinceSelect.disabled = false;
                                 data.sort((a, b) => a.name.localeCompare(b.name));
@@ -146,41 +213,35 @@
                                     option.textContent = province.name;
                                     provinceSelect.appendChild(option);
                                 });
-
-                                const selectedCode = autoSelect(provinceSelect, savedProvince);
-                                if (selectedCode) {
-                                    loadCities(selectedCode, false, savedCity, savedBarangay);
-                                }
                             } else {
-                                // No Provinces (e.g., NCR), load cities directly from Region
-                                fetchCities(regionCode, true, savedCity, savedBarangay);
-                                hiddenProvince.value = hiddenRegion.value; // Consistency
+                                // No provinces (e.g. NCR)
+                                fetchCities(regionCode, true);
+                                hiddenProvince.value = hiddenRegion.value;
                             }
-                        })
-                        .catch(error => console.error('Error fetching provinces:', error));
+                        });
                 }
-            }
+            });
 
-            // Load Cities Logic
-            function loadCities(parentCode, isRegion, savedCity, savedBarangay) {
-                 // Reset dependent fields if not just loading
-                if (!savedCity) {
-                    citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
-                    citySelect.disabled = true;
-                    hiddenCity.value = '';
+            // 3. On Province Change
+            provinceSelect.addEventListener('change', function() {
+                const provinceCode = this.value;
+                const provinceName = this.options[this.selectedIndex].text;
+                hiddenProvince.value = provinceCode ? provinceName : '';
 
-                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
-                    barangaySelect.disabled = true;
-                    hiddenBarangay.value = '';
+                citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                citySelect.disabled = true;
+                hiddenCity.value = '';
+
+                barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                barangaySelect.disabled = true;
+                hiddenBarangay.value = '';
+
+                if (provinceCode) {
+                    fetchCities(provinceCode, false);
                 }
+            });
 
-                if (parentCode) {
-                    fetchCities(parentCode, isRegion, savedCity, savedBarangay);
-                }
-            }
-
-             // Helper function to fetch cities
-            function fetchCities(code, isRegion, savedCity, savedBarangay) {
+            function fetchCities(code, isRegion) {
                 citySelect.disabled = false;
                 const endpoint = isRegion
                     ? `${API_BASE}/regions/${code}/cities-municipalities/`
@@ -189,7 +250,6 @@
                 fetch(endpoint)
                     .then(response => response.json())
                     .then(data => {
-                        citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
                         data.sort((a, b) => a.name.localeCompare(b.name));
                         data.forEach(city => {
                             const option = document.createElement('option');
@@ -197,29 +257,24 @@
                             option.textContent = city.name;
                             citySelect.appendChild(option);
                         });
-
-                        const selectedCode = autoSelect(citySelect, savedCity);
-                        if (selectedCode) {
-                            loadBarangays(selectedCode, savedBarangay);
-                        }
-                    })
-                    .catch(error => console.error('Error fetching cities:', error));
+                    });
             }
 
-             // Load Barangays Logic
-            function loadBarangays(cityCode, savedBarangay) {
-                 if (!savedBarangay) {
-                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
-                    barangaySelect.disabled = true;
-                    hiddenBarangay.value = '';
-                 }
+            // 4. On City Change
+            citySelect.addEventListener('change', function() {
+                const cityCode = this.value;
+                const cityName = this.options[this.selectedIndex].text;
+                hiddenCity.value = cityCode ? cityName : '';
+
+                barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                barangaySelect.disabled = true;
+                hiddenBarangay.value = '';
 
                 if (cityCode) {
                     barangaySelect.disabled = false;
                     fetch(`${API_BASE}/cities-municipalities/${cityCode}/barangays/`)
                         .then(response => response.json())
                         .then(data => {
-                            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
                             data.sort((a, b) => a.name.localeCompare(b.name));
                             data.forEach(barangay => {
                                 const option = document.createElement('option');
@@ -227,36 +282,11 @@
                                 option.textContent = barangay.name;
                                 barangaySelect.appendChild(option);
                             });
-
-                            autoSelect(barangaySelect, savedBarangay);
-                        })
-                        .catch(error => console.error('Error fetching barangays:', error));
+                        });
                 }
-            }
-
-
-            // EVENT LISTENERS (User Interaction)
-            regionSelect.addEventListener('change', function() {
-                const regionCode = this.value;
-                const regionName = this.options[this.selectedIndex].text;
-                hiddenRegion.value = regionCode ? regionName.split(' (')[0] : '';
-                loadProvinces(regionCode, null, null, null); // Pass null to reset downstream
             });
 
-            provinceSelect.addEventListener('change', function() {
-                const provinceCode = this.value;
-                const provinceName = this.options[this.selectedIndex].text;
-                hiddenProvince.value = provinceCode ? provinceName : '';
-                loadCities(provinceCode, false, null, null);
-            });
-
-            citySelect.addEventListener('change', function() {
-                const cityCode = this.value;
-                const cityName = this.options[this.selectedIndex].text;
-                hiddenCity.value = cityCode ? cityName : '';
-                loadBarangays(cityCode, null);
-            });
-
+            // 5. On Barangay Change
             barangaySelect.addEventListener('change', function() {
                 const barangayName = this.options[this.selectedIndex].text;
                 hiddenBarangay.value = this.value ? barangayName : '';

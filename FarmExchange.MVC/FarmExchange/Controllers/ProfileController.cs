@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FarmExchange.Data;
 using FarmExchange.Models;
+using FarmExchange.ViewModels; // Added
 
 namespace FarmExchange.Controllers
 {
@@ -20,6 +21,7 @@ namespace FarmExchange.Controllers
         {
             var profile = await _context.Profiles
                 .Include(p => p.Harvests)
+                .Include(p => p.Addresses) // Include addresses for display
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (profile == null)
@@ -46,20 +48,32 @@ namespace FarmExchange.Controllers
 
             if (profile == null) return NotFound();
 
-            return View(profile);
+            var currentAddress = profile.Addresses.FirstOrDefault();
+
+            var viewModel = new EditProfileViewModel
+            {
+                FirstName = profile.FirstName,
+                LastName = profile.LastName,
+                MiddleName = profile.MiddleName,
+                ExtensionName = profile.ExtensionName,
+                Phone = profile.Phone,
+
+                // Populate address fields for display (even if we don't bind them back directly without "UpdateAddress" flag)
+                UnitNumber = currentAddress?.UnitNumber,
+                StreetName = currentAddress?.StreetName,
+                Barangay = currentAddress?.Barangay,
+                City = currentAddress?.City,
+                Province = currentAddress?.Province,
+                Region = currentAddress?.Region,
+                PostalCode = currentAddress?.PostalCode
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            Profile model,
-            string? unitNumber,
-            string? streetName,
-            string? barangay,
-            string? city,
-            string? province,
-            string? region,
-            string? postalCode)
+        public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
             var profile = await _context.Profiles
@@ -70,15 +84,39 @@ namespace FarmExchange.Controllers
 
             if (ModelState.IsValid)
             {
+                // 1. Update Profile Info
                 profile.FirstName = model.FirstName;
                 profile.LastName = model.LastName;
                 profile.MiddleName = model.MiddleName;
                 profile.ExtensionName = model.ExtensionName;
                 profile.Phone = model.Phone;
+                // Bio Removed as requested
 
-                // We're not updating Location here because it's derived from Address
-                // If the user wants to update address, that's a separate complex flow.
-                // But for "Edit Profile", Name/Phone is standard.
+                // 2. Update Address if requested
+                if (model.UpdateAddress)
+                {
+                    // Clear existing addresses (Simplification: User has 1 address)
+                    // Or find the first one
+                    var address = profile.Addresses.FirstOrDefault();
+                    if (address == null)
+                    {
+                        address = new UserAddress { UserID = userId };
+                        _context.UserAddresses.Add(address);
+                    }
+
+                    address.UnitNumber = model.UnitNumber;
+                    address.StreetName = model.StreetName;
+                    address.Barangay = model.Barangay;
+                    address.City = model.City;
+                    address.Province = model.Province;
+                    address.Region = model.Region;
+                    address.PostalCode = model.PostalCode;
+
+                    // Update Legacy Location String
+                    profile.Location = string.IsNullOrEmpty(model.Province)
+                        ? $"{model.Barangay}, {model.City}, {model.Region}"
+                        : $"{model.Barangay}, {model.City}, {model.Province}";
+                }
 
                 profile.UpdatedAt = DateTime.UtcNow;
 
@@ -86,7 +124,7 @@ namespace FarmExchange.Controllers
                 return RedirectToAction("Details", new { id = userId });
             }
 
-            return View(profile);
+            return View(model);
         }
     }
 }
