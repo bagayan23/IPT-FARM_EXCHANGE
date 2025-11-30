@@ -164,6 +164,12 @@
             fetch(`${API_BASE}/provinces/`)
                 .then(response => response.json())
                 .then(data => {
+                    // Manually add Metro Manila (NCR)
+                    data.push({
+                        code: '130000000',
+                        name: 'Metro Manila'
+                    });
+
                     data.sort((a, b) => a.name.localeCompare(b.name));
                     data.forEach(province => {
                         const option = document.createElement('option');
@@ -191,8 +197,19 @@
 
                 if (provinceCode) {
                     citySelect.disabled = false;
+
+                    // Determine endpoint based on whether it is NCR or a regular province
+                    let url = '';
+                    if (provinceCode === '130000000') {
+                        // Endpoint for NCR (Region)
+                        url = `${API_BASE}/regions/${provinceCode}/cities-municipalities/`;
+                    } else {
+                        // Endpoint for regular provinces
+                        url = `${API_BASE}/provinces/${provinceCode}/cities-municipalities/`;
+                    }
+
                     // Fetch Cities/Municipalities
-                    fetch(`${API_BASE}/provinces/${provinceCode}/cities-municipalities/`)
+                    fetch(url)
                         .then(response => response.json())
                         .then(data => {
                             data.sort((a, b) => a.name.localeCompare(b.name));
