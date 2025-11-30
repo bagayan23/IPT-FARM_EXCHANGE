@@ -85,7 +85,7 @@
                     <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
                     @if (activeHarvests.Any())
                     {
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-4">
                             @foreach (var harvest in activeHarvests)
                             {
                                 <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
