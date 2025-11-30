@@ -80,7 +80,9 @@
                                     @harvest.Description
                                 </p>
                                 <div class="text-sm text-gray-600 mb-3">
-                                    <p class="font-medium">@harvest.User.FullName</p>
+                                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@harvest.UserId" class="font-medium hover:text-green-600 underline-offset-2 hover:underline transition-colors">
+                                        @harvest.User.FullName
+                                    </a>
                                     @if (!string.IsNullOrEmpty(harvest.User.Location))
                                     {
                                         <p class="text-xs">@harvest.User.Location</p>
