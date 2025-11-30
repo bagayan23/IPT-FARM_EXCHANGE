@@ -60,34 +60,38 @@
                                     }
                                     else
                                     {
+                                        <p class="text-xs font-bold mb-1 @(isMe ? "text-white" : "text-green-600")">
+                                            @(isMe ? "You" : message.Sender.FullName)
+                                        </p>
                                         <p class="text-sm font-semibold mb-1 @(isMe ? "text-green-100" : "text-gray-500")">
                                             @message.Subject
                                         </p>
                                         <p class="text-sm whitespace-pre-wrap">@message.Content</p>
                                     }
-                                    <div class="mt-1 text-xs @(isMe ? "text-green-100" : "text-gray-400") text-right">
-                                        @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
+                                    <div class="mt-1 flex items-center justify-end gap-2">
+                                        @if (isMe && !message.IsDeleted)
+                                        {
+                                            <div class="flex items-center gap-2 mr-2">
+                                                <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')" class="p-1 text-white hover:text-gray-200 transition-colors" title="Edit">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                    </svg>
+                                                </button>
+                                                <form asp-action="Delete" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                                                    <input type="hidden" name="id" value="@message.Id" />
+                                                    <button type="submit" class="p-1 text-white hover:text-red-200 transition-colors" title="Delete">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        }
+                                        <span class="text-xs @(isMe ? "text-green-100" : "text-gray-400")">
+                                            @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
+                                        </span>
                                     </div>
                                 </div>
-
-                                @if (isMe && !message.IsDeleted)
-                                {
-                                    <div class="absolute top-0 -left-16 hidden group-hover:flex items-center space-x-1 h-full">
-                                        <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')" class="p-1.5 text-gray-400 hover:text-blue-600 bg-white rounded-full shadow-sm hover:shadow transition-all" title="Edit">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                        <form asp-action="Delete" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this message?');">
-                                            <input type="hidden" name="id" value="@message.Id" />
-                                            <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 bg-white rounded-full shadow-sm hover:shadow transition-all" title="Delete">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                }
                             </div>
                         </div>
                     }
