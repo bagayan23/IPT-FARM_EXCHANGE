@@ -1,0 +1,76 @@
+using FarmExchange.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace FarmExchange.Data
+{
+    public static class DbInitializer
+    {
+        public static void Initialize(FarmExchangeDbContext context)
+        {
+            // Ensure the database itself exists
+            context.Database.EnsureCreated();
+
+            // Manually add tables if they don't exist (because we can't run Migrations in this environment)
+
+            // 1. ForumThreads
+            var createThreadsTable = @"
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ForumThreads' AND xtype='U')
+                BEGIN
+                    CREATE TABLE [ForumThreads] (
+                        [Id] uniqueidentifier NOT NULL,
+                        [AuthorId] uniqueidentifier NOT NULL,
+                        [Title] nvarchar(200) NOT NULL,
+                        [Content] nvarchar(max) NOT NULL,
+                        [Category] nvarchar(50) NOT NULL DEFAULT 'General',
+                        [CreatedAt] datetime2 NOT NULL,
+                        CONSTRAINT [PK_ForumThreads] PRIMARY KEY ([Id]),
+                        CONSTRAINT [FK_ForumThreads_Profiles_AuthorId] FOREIGN KEY ([AuthorId]) REFERENCES [Profiles] ([Id]) ON DELETE CASCADE
+                    );
+                    CREATE INDEX [IX_ForumThreads_Category] ON [ForumThreads] ([Category]);
+                    CREATE INDEX [IX_ForumThreads_AuthorId] ON [ForumThreads] ([AuthorId]);
+                END";
+            context.Database.ExecuteSqlRaw(createThreadsTable);
+
+            // 2. ForumPosts
+            var createPostsTable = @"
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='ForumPosts' AND xtype='U')
+                BEGIN
+                    CREATE TABLE [ForumPosts] (
+                        [Id] uniqueidentifier NOT NULL,
+                        [ThreadId] uniqueidentifier NOT NULL,
+                        [AuthorId] uniqueidentifier NOT NULL,
+                        [Content] nvarchar(2000) NOT NULL,
+                        [CreatedAt] datetime2 NOT NULL,
+                        CONSTRAINT [PK_ForumPosts] PRIMARY KEY ([Id]),
+                        CONSTRAINT [FK_ForumPosts_ForumThreads_ThreadId] FOREIGN KEY ([ThreadId]) REFERENCES [ForumThreads] ([Id]) ON DELETE CASCADE,
+                        CONSTRAINT [FK_ForumPosts_Profiles_AuthorId] FOREIGN KEY ([AuthorId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION
+                    );
+                    CREATE INDEX [IX_ForumPosts_ThreadId] ON [ForumPosts] ([ThreadId]);
+                    CREATE INDEX [IX_ForumPosts_AuthorId] ON [ForumPosts] ([AuthorId]);
+                END";
+            context.Database.ExecuteSqlRaw(createPostsTable);
+
+            // 3. Reviews
+            var createReviewsTable = @"
+                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Reviews' AND xtype='U')
+                BEGIN
+                    CREATE TABLE [Reviews] (
+                        [Id] uniqueidentifier NOT NULL,
+                        [BuyerId] uniqueidentifier NOT NULL,
+                        [SellerId] uniqueidentifier NOT NULL,
+                        [TransactionId] uniqueidentifier NULL,
+                        [Rating] int NOT NULL,
+                        [Comment] nvarchar(1000) NULL,
+                        [CreatedAt] datetime2 NOT NULL,
+                        CONSTRAINT [PK_Reviews] PRIMARY KEY ([Id]),
+                        CONSTRAINT [FK_Reviews_Profiles_BuyerId] FOREIGN KEY ([BuyerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
+                        CONSTRAINT [FK_Reviews_Profiles_SellerId] FOREIGN KEY ([SellerId]) REFERENCES [Profiles] ([Id]) ON DELETE NO ACTION,
+                        CONSTRAINT [FK_Reviews_Transactions_TransactionId] FOREIGN KEY ([TransactionId]) REFERENCES [Transactions] ([Id])
+                    );
+                    CREATE INDEX [IX_Reviews_BuyerId] ON [Reviews] ([BuyerId]);
+                    CREATE INDEX [IX_Reviews_SellerId] ON [Reviews] ([SellerId]);
+                END";
+            context.Database.ExecuteSqlRaw(createReviewsTable);
+        }
+    }
+}
