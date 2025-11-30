@@ -79,35 +79,90 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column: Active Harvests -->
             <div class="lg:col-span-3 space-y-6">
-                <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
-                @if (activeHarvests.Any())
+                @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
                 {
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach (var harvest in activeHarvests)
-                        {
-                            <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <h3 class="text-lg font-semibold text-gray-900">@harvest.Title</h3>
-                                        <p class="text-sm text-gray-500">@harvest.Category</p>
+                    <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
+                    @if (activeHarvests.Any())
+                    {
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            @foreach (var harvest in activeHarvests)
+                            {
+                                <div class="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-gray-900">@harvest.Title</h3>
+                                            <p class="text-sm text-gray-500">@harvest.Category</p>
+                                        </div>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            ₱@harvest.Price.ToString("F2") / @harvest.Unit
+                                        </span>
                                     </div>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        ₱@harvest.Price.ToString("F2") / @harvest.Unit
-                                    </span>
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <span class="text-sm text-gray-600">@harvest.QuantityAvailable @harvest.Unit available</span>
+                                        <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
+                                    </div>
                                 </div>
-                                <div class="mt-4 flex items-center justify-between">
-                                    <span class="text-sm text-gray-600">@harvest.QuantityAvailable @harvest.Unit available</span>
-                                    <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-green-600 hover:text-green-800 font-medium text-sm">View Details →</a>
-                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-gray-500 italic">No active listings at the moment.</p>
+                    }
+                }
+                else if (Model.UserType == FarmExchange.Models.UserType.Buyer)
+                {
+                    @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
+                    {
+                        <h2 class="text-2xl font-bold text-gray-900">My Orders</h2>
+                        @if (Model.BuyerTransactions != null && Model.BuyerTransactions.Any())
+                        {
+                            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                                <ul class="divide-y divide-gray-200">
+                                    @foreach (var order in Model.BuyerTransactions.OrderByDescending(t => t.TransactionDate))
+                                    {
+                                        <li>
+                                            <div class="px-4 py-4 sm:px-6">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="text-sm font-medium text-green-600 truncate">
+                                                        @(order.Harvest?.Title ?? "Product Unavailable")
+                                                    </p>
+                                                    <div class="ml-2 flex-shrink-0 flex">
+                                                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                            @(order.Status == "completed" ? "bg-green-100 text-green-800" :
+                                                              order.Status == "cancelled" ? "bg-red-100 text-red-800" :
+                                                              "bg-yellow-100 text-yellow-800")">
+                                                            @order.Status
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 sm:flex sm:justify-between">
+                                                    <div class="sm:flex">
+                                                        <p class="flex items-center text-sm text-gray-500">
+                                                            Quantity: @order.Quantity
+                                                        </p>
+                                                        <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                                            Total: ₱@order.TotalPrice.ToString("F2")
+                                                        </p>
+                                                    </div>
+                                                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                                        <p>
+                                                            Ordered on <time datetime="@order.TransactionDate.ToString("yyyy-MM-dd")">@order.TransactionDate.ToString("MMM d, yyyy")</time>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
                             </div>
                         }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-gray-500 italic">No active listings at the moment.</p>
+                        else
+                        {
+                            <p class="text-gray-500 italic">No orders found.</p>
+                        }
+                    }
                 }
             </div>
         </div>
