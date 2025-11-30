@@ -155,8 +155,11 @@
 
         // Purchase Modal Logic (Unchanged)
         let currentPrice = 0;
+        let currentUnit = '';
+
         function openPurchaseModal(id, title, price, unit, available) {
             currentPrice = price;
+            currentUnit = unit;
             document.getElementById('harvestId').value = id;
             document.getElementById('modalTitle').textContent = 'Purchase ' + title;
             document.getElementById('modalPrice').textContent = 'Price: ₱' + price.toFixed(2) + '/' + unit;
@@ -187,6 +190,17 @@
             const total = quantity * currentPrice;
             document.getElementById('modalTotal').textContent = 'Total: ₱' + total.toFixed(2);
         }
-        document.getElementById('quantity').addEventListener('input', updateTotal);
+
+        const qtyInput = document.getElementById('quantity');
+        qtyInput.addEventListener('input', updateTotal);
+
+        // Prevent typing decimal point for integer units in modal
+        qtyInput.addEventListener('keypress', function(e) {
+             if (!['kg', 'lb', 'g'].includes(currentUnit)) {
+                 if (e.key === '.' || e.key === ',') {
+                     e.preventDefault();
+                 }
+             }
+        });
     </script>
 }
