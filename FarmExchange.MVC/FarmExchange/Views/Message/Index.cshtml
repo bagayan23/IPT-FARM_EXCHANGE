@@ -145,5 +145,23 @@
             document.getElementById('composeModal').classList.add('hidden');
             document.getElementById('composeModal').classList.remove('flex');
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var recipientId = @Json.Serialize(ViewBag.RecipientId);
+            var subject = @Json.Serialize(ViewBag.Subject);
+
+            if (recipientId) {
+                openComposeModal();
+                var select = document.getElementById('recipientId');
+                if (select) {
+                    select.value = recipientId;
+                }
+
+                var subjectInput = document.getElementById('subject');
+                if (subjectInput && subject) {
+                    subjectInput.value = subject;
+                }
+            }
+        });
     </script>
 }
