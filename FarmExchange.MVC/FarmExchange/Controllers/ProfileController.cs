@@ -70,11 +70,10 @@ namespace FarmExchange.Controllers
                 profile.MiddleName = model.MiddleName;
                 profile.ExtensionName = model.ExtensionName;
                 profile.Phone = model.Phone;
-                profile.Bio = model.Bio;
 
                 // We're not updating Location here because it's derived from Address
                 // If the user wants to update address, that's a separate complex flow.
-                // But for "Edit Profile", Name/Bio/Phone is standard.
+                // But for "Edit Profile", Name/Phone is standard.
 
                 profile.UpdatedAt = DateTime.UtcNow;
 
