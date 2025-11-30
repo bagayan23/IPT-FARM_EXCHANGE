@@ -31,11 +31,33 @@ namespace FarmExchange.Controllers
 
             if (profile.UserType == UserType.Farmer)
             {
-                ViewBag.Harvests = await _context.Harvests
+                var harvests = await _context.Harvests
                     .Where(h => h.UserId == userId)
                     .OrderByDescending(h => h.CreatedAt)
                     .Take(5)
                     .ToListAsync();
+
+                bool needsSave = false;
+                foreach (var h in harvests)
+                {
+                    if (h.QuantityAvailable > 0 && h.Status == "sold_out")
+                    {
+                        h.Status = "available";
+                        needsSave = true;
+                    }
+                    else if (h.QuantityAvailable == 0 && h.Status == "available")
+                    {
+                        h.Status = "sold_out";
+                        needsSave = true;
+                    }
+                }
+
+                if (needsSave)
+                {
+                    await _context.SaveChangesAsync();
+                }
+
+                ViewBag.Harvests = harvests;
 
                 ViewBag.Sales = await _context.Transactions
                     .Include(t => t.Harvest)
