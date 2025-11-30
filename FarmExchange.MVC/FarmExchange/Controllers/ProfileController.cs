@@ -40,7 +40,9 @@ namespace FarmExchange.Controllers
         public async Task<IActionResult> Edit()
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var profile = await _context.Profiles.FindAsync(userId);
+            var profile = await _context.Profiles
+                .Include(p => p.Addresses)
+                .FirstOrDefaultAsync(p => p.Id == userId);
 
             if (profile == null) return NotFound();
 
@@ -49,19 +51,22 @@ namespace FarmExchange.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Profile model)
+        public async Task<IActionResult> Edit(
+            Profile model,
+            string? unitNumber,
+            string? streetName,
+            string? barangay,
+            string? city,
+            string? province,
+            string? region,
+            string? postalCode)
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var profile = await _context.Profiles.FindAsync(userId);
+            var profile = await _context.Profiles
+                .Include(p => p.Addresses)
+                .FirstOrDefaultAsync(p => p.Id == userId);
 
             if (profile == null) return NotFound();
-
-            // Only allow editing specific fields for now
-            // Excluding Location to prevent sync issues with UserAddress
-
-            // However, the user asked to edit "profile", let's allow Name, Phone, Bio.
-            // Location is complex due to address split, but we can allow editing the SUMMARY string?
-            // No, that would be confusing. Let's stick to Profile fields.
 
             if (ModelState.IsValid)
             {

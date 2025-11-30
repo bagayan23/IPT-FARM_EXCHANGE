@@ -55,3 +55,212 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const regionSelect = document.getElementById('regionSelect');
+            const provinceSelect = document.getElementById('provinceSelect');
+            const citySelect = document.getElementById('citySelect');
+            const barangaySelect = document.getElementById('barangaySelect');
+
+            const hiddenRegion = document.getElementById('hiddenRegion');
+            const hiddenProvince = document.getElementById('hiddenProvince');
+            const hiddenCity = document.getElementById('hiddenCity');
+            const hiddenBarangay = document.getElementById('hiddenBarangay');
+
+            // API Base URL
+            const API_BASE = 'https://psgc.gitlab.io/api';
+
+            // Function to auto-select option based on hidden value
+            function autoSelect(selectElement, hiddenValue) {
+                if (!hiddenValue) return;
+                // Match by text content because our hidden values are names, not codes
+                for (let i = 0; i < selectElement.options.length; i++) {
+                    // Try exact match or partial match (e.g. "Region I (Ilocos Region)" vs "Region I")
+                    const optionText = selectElement.options[i].text;
+
+                    // Simple logic: if option contains the hidden value, or hidden value contains option text (normalized)
+                    // The hidden values are stored names (e.g. "Pangasinan"). The options are "Pangasinan".
+                    // Region is trickier: "Region I" vs "Region I (Ilocos Region)".
+
+                    if (optionText === hiddenValue || optionText.startsWith(hiddenValue + ' (') || hiddenValue.startsWith(optionText)) {
+                        selectElement.selectedIndex = i;
+                        // selectElement.value will be the Code
+                        return selectElement.value;
+                    }
+                }
+                return null;
+            }
+
+            // 1. Fetch Regions
+            fetch(`${API_BASE}/regions/`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region.code;
+                        option.textContent = region.name + (region.regionName ? ` (${region.regionName})` : '');
+                        regionSelect.appendChild(option);
+                    });
+
+                    // Auto-select Region
+                    const selectedCode = autoSelect(regionSelect, hiddenRegion.value);
+                    if (selectedCode) {
+                        // Trigger change manually to load provinces
+                        loadProvinces(selectedCode, hiddenProvince.value, hiddenCity.value, hiddenBarangay.value);
+                    }
+                })
+                .catch(error => console.error('Error fetching regions:', error));
+
+            // Load Provinces Logic
+            function loadProvinces(regionCode, savedProvince, savedCity, savedBarangay) {
+                // Reset ALL dependent fields if not just loading
+                if (!savedProvince) {
+                    provinceSelect.innerHTML = '<option value="">Select Province</option>';
+                    provinceSelect.disabled = true;
+                    hiddenProvince.value = '';
+
+                    citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                    citySelect.disabled = true;
+                    hiddenCity.value = '';
+
+                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                    barangaySelect.disabled = true;
+                    hiddenBarangay.value = '';
+                }
+
+                if (regionCode) {
+                    fetch(`${API_BASE}/regions/${regionCode}/provinces/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            provinceSelect.innerHTML = '<option value="">Select Province</option>'; // Clear old options
+                            if (data.length > 0) {
+                                provinceSelect.disabled = false;
+                                data.sort((a, b) => a.name.localeCompare(b.name));
+                                data.forEach(province => {
+                                    const option = document.createElement('option');
+                                    option.value = province.code;
+                                    option.textContent = province.name;
+                                    provinceSelect.appendChild(option);
+                                });
+
+                                const selectedCode = autoSelect(provinceSelect, savedProvince);
+                                if (selectedCode) {
+                                    loadCities(selectedCode, false, savedCity, savedBarangay);
+                                }
+                            } else {
+                                // No Provinces (e.g., NCR), load cities directly from Region
+                                fetchCities(regionCode, true, savedCity, savedBarangay);
+                                hiddenProvince.value = hiddenRegion.value; // Consistency
+                            }
+                        })
+                        .catch(error => console.error('Error fetching provinces:', error));
+                }
+            }
+
+            // Load Cities Logic
+            function loadCities(parentCode, isRegion, savedCity, savedBarangay) {
+                 // Reset dependent fields if not just loading
+                if (!savedCity) {
+                    citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                    citySelect.disabled = true;
+                    hiddenCity.value = '';
+
+                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                    barangaySelect.disabled = true;
+                    hiddenBarangay.value = '';
+                }
+
+                if (parentCode) {
+                    fetchCities(parentCode, isRegion, savedCity, savedBarangay);
+                }
+            }
+
+             // Helper function to fetch cities
+            function fetchCities(code, isRegion, savedCity, savedBarangay) {
+                citySelect.disabled = false;
+                const endpoint = isRegion
+                    ? `${API_BASE}/regions/${code}/cities-municipalities/`
+                    : `${API_BASE}/provinces/${code}/cities-municipalities/`;
+
+                fetch(endpoint)
+                    .then(response => response.json())
+                    .then(data => {
+                        citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+                        data.sort((a, b) => a.name.localeCompare(b.name));
+                        data.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.code;
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+
+                        const selectedCode = autoSelect(citySelect, savedCity);
+                        if (selectedCode) {
+                            loadBarangays(selectedCode, savedBarangay);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching cities:', error));
+            }
+
+             // Load Barangays Logic
+            function loadBarangays(cityCode, savedBarangay) {
+                 if (!savedBarangay) {
+                    barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                    barangaySelect.disabled = true;
+                    hiddenBarangay.value = '';
+                 }
+
+                if (cityCode) {
+                    barangaySelect.disabled = false;
+                    fetch(`${API_BASE}/cities-municipalities/${cityCode}/barangays/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+                            data.sort((a, b) => a.name.localeCompare(b.name));
+                            data.forEach(barangay => {
+                                const option = document.createElement('option');
+                                option.value = barangay.code;
+                                option.textContent = barangay.name;
+                                barangaySelect.appendChild(option);
+                            });
+
+                            autoSelect(barangaySelect, savedBarangay);
+                        })
+                        .catch(error => console.error('Error fetching barangays:', error));
+                }
+            }
+
+
+            // EVENT LISTENERS (User Interaction)
+            regionSelect.addEventListener('change', function() {
+                const regionCode = this.value;
+                const regionName = this.options[this.selectedIndex].text;
+                hiddenRegion.value = regionCode ? regionName.split(' (')[0] : '';
+                loadProvinces(regionCode, null, null, null); // Pass null to reset downstream
+            });
+
+            provinceSelect.addEventListener('change', function() {
+                const provinceCode = this.value;
+                const provinceName = this.options[this.selectedIndex].text;
+                hiddenProvince.value = provinceCode ? provinceName : '';
+                loadCities(provinceCode, false, null, null);
+            });
+
+            citySelect.addEventListener('change', function() {
+                const cityCode = this.value;
+                const cityName = this.options[this.selectedIndex].text;
+                hiddenCity.value = cityCode ? cityName : '';
+                loadBarangays(cityCode, null);
+            });
+
+            barangaySelect.addEventListener('change', function() {
+                const barangayName = this.options[this.selectedIndex].text;
+                hiddenBarangay.value = this.value ? barangayName : '';
+            });
+        });
+    </script>
+}
