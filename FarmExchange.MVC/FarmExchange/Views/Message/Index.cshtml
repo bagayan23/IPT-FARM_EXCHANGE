@@ -1,4 +1,5 @@
-﻿@model List<Message>
+@using FarmExchange.ViewModels
+@model List<ConversationViewModel>
 @{
     ViewData["Title"] = "Messages";
     var profile = ViewBag.Profile as Profile;
@@ -21,57 +22,53 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-md p-4">
-                    <h2 class="font-semibold text-gray-900 mb-4">All Messages</h2>
-                    @if (!Model.Any())
-                    {
-                        <p class="text-gray-600 text-center py-8 text-sm">No messages yet</p>
-                    }
-                    else
-                    {
-                        <div class="space-y-2">
-                            @foreach (var message in Model)
-                            {
-                                <a href="@Url.Action("Details", new { id = message.Id })" class="block p-3 rounded-lg cursor-pointer transition-colors bg-gray-50 hover:bg-gray-100">
-                                    <div class="flex items-start justify-between mb-1">
-                                        <span class="font-medium text-sm text-gray-900 truncate flex-1">
-                                            @if (message.SenderId == profile?.Id)
-                                            {
-                                                <text>To: @message.Recipient.FullName</text>
-                                            }
-                                            else
-                                            {
-                                                @message.Sender.FullName
-                                            }
-                                        </span>
-                                        @if (!message.IsRead && message.RecipientId == profile?.Id)
-                                        {
-                                            <svg class="h-4 w-4 text-green-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                            </svg>
-                                        }
-                                    </div>
-                                    <p class="text-xs text-gray-600 truncate">@message.Subject</p>
-                                    <p class="text-xs text-gray-500 mt-1">@message.CreatedAt.ToLocalTime().ToString("MM/dd/yyyy")</p>
-                                </a>
-                            }
-                        </div>
-                    }
-                </div>
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="font-semibold text-lg text-gray-900">Recent Conversations</h2>
             </div>
-
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <svg class="h-16 w-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            @if (!Model.Any())
+            {
+                <div class="p-8 text-center">
+                    <svg class="h-12 w-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                     </svg>
-                    <p class="text-gray-600">
-                        Select a message to view or compose a new one
-                    </p>
+                    <p class="text-gray-500">No conversations yet.</p>
                 </div>
-            </div>
+            }
+            else
+            {
+                <div class="divide-y divide-gray-200">
+                    @foreach (var conversation in Model)
+                    {
+                        <a href="@Url.Action("Conversation", new { partnerId = conversation.PartnerId })" class="block p-4 hover:bg-gray-50 transition-colors duration-150">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center min-w-0">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-lg">
+                                            @conversation.PartnerName[0]
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 min-w-0 flex-1">
+                                        <div class="flex items-center">
+                                            <p class="text-sm font-medium text-gray-900 truncate">@conversation.PartnerName</p>
+                                            @if (conversation.UnreadCount > 0)
+                                            {
+                                                <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    @conversation.UnreadCount new
+                                                </span>
+                                            }
+                                        </div>
+                                        <p class="text-sm text-gray-500 truncate mt-1">@conversation.LastMessage.Content</p>
+                                    </div>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 text-xs text-gray-500">
+                                    @conversation.LastMessage.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FarmExchange.Data;
 using FarmExchange.Models;
+using FarmExchange.ViewModels;
 using System.Security.Claims;
 
 namespace FarmExchange.Controllers
@@ -34,8 +35,25 @@ namespace FarmExchange.Controllers
                 .Where(m => m.RecipientId == userId)
                 .ToListAsync();
 
-            var allMessages = sentMessages.Concat(receivedMessages)
-                .OrderByDescending(m => m.CreatedAt)
+            var allMessages = sentMessages.Concat(receivedMessages);
+
+            var conversations = allMessages
+                .GroupBy(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
+                .Select(g => {
+                    var partnerId = g.Key;
+                    var lastMessage = g.OrderByDescending(m => m.CreatedAt).First();
+                    var unreadCount = g.Count(m => m.RecipientId == userId && !m.IsRead);
+                    var partnerName = lastMessage.SenderId == userId ? lastMessage.Recipient.FullName : lastMessage.Sender.FullName;
+
+                    return new ConversationViewModel
+                    {
+                        PartnerId = partnerId,
+                        PartnerName = partnerName,
+                        LastMessage = lastMessage,
+                        UnreadCount = unreadCount
+                    };
+                })
+                .OrderByDescending(c => c.LastMessage.CreatedAt)
                 .ToList();
 
             ViewBag.Profile = profile;
@@ -47,7 +65,43 @@ namespace FarmExchange.Controllers
                 .Where(p => p.UserType == UserType.Farmer)
                 .ToListAsync();
 
-            return View(allMessages);
+            return View(conversations);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Conversation(Guid partnerId)
+        {
+            var userId = GetCurrentUserId();
+            var partner = await _context.Profiles.FindAsync(partnerId);
+
+            if (partner == null)
+            {
+                return RedirectToAction("Index");
+            }
+
+            var messages = await _context.Messages
+                .Include(m => m.Sender)
+                .Include(m => m.Recipient)
+                .Where(m => (m.SenderId == userId && m.RecipientId == partnerId) ||
+                           (m.SenderId == partnerId && m.RecipientId == userId))
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+
+            // Mark received messages as read
+            var unreadMessages = messages.Where(m => m.RecipientId == userId && !m.IsRead).ToList();
+            if (unreadMessages.Any())
+            {
+                foreach (var msg in unreadMessages)
+                {
+                    msg.IsRead = true;
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            ViewBag.CurrentUser = await _context.Profiles.FindAsync(userId);
+            ViewBag.Partner = partner;
+
+            return View(messages);
         }
 
         [HttpPost]
@@ -61,7 +115,7 @@ namespace FarmExchange.Controllers
                 Id = Guid.NewGuid(),
                 SenderId = userId,
                 RecipientId = recipientId,
-                Subject = subject,
+                Subject = subject ?? "No Subject",
                 Content = content,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
@@ -71,7 +125,7 @@ namespace FarmExchange.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Message sent successfully!";
-            return RedirectToAction("Index");
+            return RedirectToAction("Conversation", new { partnerId = recipientId });
         }
 
         [HttpPost]
