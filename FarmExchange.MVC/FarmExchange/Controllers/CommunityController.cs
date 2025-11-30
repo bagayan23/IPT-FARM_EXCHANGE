@@ -117,8 +117,6 @@ namespace FarmExchange.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditThread(Guid id, ForumThread model)
         {
-            if (id != model.Id) return NotFound();
-
             var userId = GetCurrentUserId();
             var thread = await _context.ForumThreads.FindAsync(id);
 
@@ -127,8 +125,6 @@ namespace FarmExchange.Controllers
                 return RedirectToAction("Index");
             }
 
-            // Remove navigation properties and AuthorId from validation
-            // AuthorId is required in model but not in form (security)
             ModelState.Remove("Author");
             ModelState.Remove("AuthorId");
             ModelState.Remove("Posts");
@@ -136,9 +132,9 @@ namespace FarmExchange.Controllers
             if (ModelState.IsValid)
             {
                 thread.Title = model.Title;
-                thread.Content = model.Content;
                 thread.Category = model.Category;
-
+                thread.Content = model.Content;
+                
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Thread", new { id = thread.Id });
             }

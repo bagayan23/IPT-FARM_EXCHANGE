@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfca8a14b067bd3483097a5f7449b487a70b988c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f6ba501704ba9c7bd90b5d086c40c79c585b72d2")]
 [assembly: System.Reflection.AssemblyProductAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FarmExchange")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

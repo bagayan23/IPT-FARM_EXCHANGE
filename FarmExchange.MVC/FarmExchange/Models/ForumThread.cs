@@ -20,12 +20,14 @@ namespace FarmExchange.Models
         public string Content { get; set; } = string.Empty;
 
         [StringLength(50)]
-        public string Category { get; set; } = "General"; // e.g., "Sustainable Farming", "Events", "General"
+        public string Category { get; set; } = "General";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("AuthorId")]
-        public virtual Profile Author { get; set; } = null!;
+        // The '?' is CRITICAL here. Without it, Edit fails validation.
+        public virtual Profile? Author { get; set; }
+        // ------------------------------------------------
 
         public virtual ICollection<ForumPost> Posts { get; set; } = new List<ForumPost>();
     }
