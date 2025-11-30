@@ -78,6 +78,14 @@ namespace FarmExchange.Data
                     ALTER TABLE [UserAddresses] ADD [Region] nvarchar(100) NULL;
                 END";
             context.Database.ExecuteSqlRaw(alterUserAddressesTable);
+
+            // 5. Remove Bio from Profiles if it exists
+            var dropBioColumn = @"
+                IF EXISTS (SELECT * FROM sys.columns WHERE Name = N'Bio' AND Object_ID = Object_ID(N'Profiles'))
+                BEGIN
+                    ALTER TABLE [Profiles] DROP COLUMN [Bio];
+                END";
+            context.Database.ExecuteSqlRaw(dropBioColumn);
         }
     }
 }
