@@ -186,7 +186,7 @@ namespace FarmExchange.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, string subject, string content)
+        public async Task<IActionResult> Edit(Guid id, string content)
         {
             var userId = GetCurrentUserId();
             var message = await _context.Messages.FindAsync(id);
@@ -196,16 +196,19 @@ namespace FarmExchange.Controllers
                 return RedirectToAction("Index");
             }
 
-            if (!string.IsNullOrEmpty(subject) && !string.IsNullOrEmpty(content))
+            if (!string.IsNullOrEmpty(content))
             {
-                message.Subject = subject;
                 message.Content = content;
+                message.IsEdited = true;
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Message updated successfully!";
-                return RedirectToAction("Details", new { id = message.Id });
+
+                // Determine partner ID for redirection
+                var partnerId = message.SenderId == userId ? message.RecipientId : message.SenderId;
+                return RedirectToAction("Conversation", new { partnerId = partnerId });
             }
 
-            return View(message);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -217,9 +220,13 @@ namespace FarmExchange.Controllers
 
             if (message != null && message.SenderId == userId)
             {
-                _context.Messages.Remove(message);
+                message.IsDeleted = true;
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Message deleted successfully!";
+
+                // Determine partner ID for redirection
+                var partnerId = message.SenderId == userId ? message.RecipientId : message.SenderId;
+                return RedirectToAction("Conversation", new { partnerId = partnerId });
             }
 
             return RedirectToAction("Index");
