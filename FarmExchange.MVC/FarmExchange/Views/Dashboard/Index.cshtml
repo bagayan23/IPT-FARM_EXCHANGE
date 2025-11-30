@@ -78,7 +78,7 @@
                     <div class="flex flex-col">
                         <h2 class="text-xl font-semibold text-gray-900">Sales Analytics</h2>
                         <div id="totalRevenueContainer" class="text-sm text-gray-600 mt-1">
-                            Total Revenue: <span id="totalRevenueValue" class="font-bold text-green-600">$0.00</span>
+                            Total Revenue: <span id="totalRevenueValue" class="font-bold text-green-600">₱0.00</span>
                         </div>
                     </div>
 
@@ -104,7 +104,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">My Sales Revenue ($)</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">My Sales Revenue (₱)</h3>
                         <div class="w-full h-64">
                             <canvas id="salesChart"></canvas>
                         </div>
@@ -146,7 +146,7 @@
                                 <div class="bg-gray-50 rounded-lg p-4">
                                     <h3 class="font-medium text-gray-900">@harvest.Title</h3>
                                     <p class="text-sm text-gray-600">
-                                        $@harvest.Price.ToString("F2")/@harvest.Unit • @harvest.QuantityAvailable @harvest.Unit available
+                                        ₱@harvest.Price.ToString("F2")/@harvest.Unit • @harvest.QuantityAvailable @harvest.Unit available
                                     </p>
                                     <span class="inline-block px-2 py-1 text-xs rounded-full mt-1 @(harvest.Status == "available" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700")">
                                         @harvest.Status
@@ -182,7 +182,7 @@
                             <div class="bg-gray-50 rounded-lg p-4">
                                 <h3 class="font-medium text-gray-900">@transaction.Harvest.Title</h3>
                                 <p class="text-sm text-gray-600">
-                                    @transaction.Quantity @transaction.Harvest.Unit • $@transaction.TotalPrice.ToString("F2")
+                                    @transaction.Quantity @transaction.Harvest.Unit • ₱@transaction.TotalPrice.ToString("F2")
                                 </p>
                                 <div class="flex items-center justify-between mt-1">
                                     <p class="text-xs text-gray-500">
@@ -319,7 +319,7 @@
 
             function updateTotalRevenue(data) {
                 const total = data.reduce((sum, item) => sum + item.totalSales, 0);
-                document.getElementById('totalRevenueValue').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('totalRevenueValue').textContent = '₱' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
             // Helper to generate distinct colors
@@ -356,7 +356,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Revenue ($)',
+                            label: 'Revenue (₱)',
                             data: salesData,
                             backgroundColor: backgroundColors,
                             borderColor: borderColors,
@@ -369,7 +369,7 @@
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                title: { display: true, text: 'Revenue ($)' }
+                                title: { display: true, text: 'Revenue (₱)' }
                             }
                         },
                         plugins: {
@@ -377,7 +377,7 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        return '$' + context.parsed.y.toFixed(2);
+                                        return '₱' + context.parsed.y.toFixed(2);
                                     }
                                 }
                             }

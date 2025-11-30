@@ -99,6 +99,119 @@ namespace FarmExchange.Controllers
             return RedirectToAction("Thread", new { id = threadId });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> EditThread(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var thread = await _context.ForumThreads.FindAsync(id);
+
+            if (thread == null || thread.AuthorId != userId)
+            {
+                return RedirectToAction("Index"); // Unauthorized or Not Found
+            }
+
+            return View(thread);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditThread(Guid id, ForumThread model)
+        {
+            if (id != model.Id) return NotFound();
+
+            var userId = GetCurrentUserId();
+            var thread = await _context.ForumThreads.FindAsync(id);
+
+            if (thread == null || thread.AuthorId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            if (ModelState.IsValid)
+            {
+                thread.Title = model.Title;
+                thread.Content = model.Content;
+                thread.Category = model.Category;
+                // We don't update CreatedAt or AuthorId
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Thread", new { id = thread.Id });
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteThread(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var thread = await _context.ForumThreads.FindAsync(id);
+
+            if (thread != null && thread.AuthorId == userId)
+            {
+                _context.ForumThreads.Remove(thread);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditPost(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var post = await _context.ForumPosts
+                .Include(p => p.Thread)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post == null || post.AuthorId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            return View(post);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditPost(Guid id, string content)
+        {
+            var userId = GetCurrentUserId();
+            var post = await _context.ForumPosts.FindAsync(id);
+
+            if (post == null || post.AuthorId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            if (!string.IsNullOrEmpty(content))
+            {
+                post.Content = content;
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Thread", new { id = post.ThreadId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePost(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var post = await _context.ForumPosts.FindAsync(id);
+
+            if (post != null && post.AuthorId == userId)
+            {
+                var threadId = post.ThreadId;
+                _context.ForumPosts.Remove(post);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Thread", new { id = threadId });
+            }
+
+            return RedirectToAction("Index");
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
