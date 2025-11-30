@@ -58,7 +58,7 @@
                         <p class="text-gray-600 text-sm">
                             @(profile?.UserType == UserType.Farmer ? "Total Revenue" : "Total Spent")
                         </p>
-                        <p class="text-3xl font-bold text-gray-900 mt-1">$@(((decimal)stats.TotalRevenue).ToString("F2"))</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-1">₱@(((decimal)stats.TotalRevenue).ToString("F2"))</p>
                     </div>
                     <svg class="h-10 w-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -146,7 +146,7 @@
                                         @transaction.Quantity @transaction.Harvest.Unit
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        $@transaction.TotalPrice.ToString("F2")
+                                        ₱@transaction.TotalPrice.ToString("F2")
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-block px-3 py-1 text-xs rounded-full @(transaction.Status == "completed" ? "bg-green-100 text-green-700" : transaction.Status == "pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700")">
