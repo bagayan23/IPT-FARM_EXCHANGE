@@ -15,13 +15,12 @@
             </p>
         </div>
 
-        <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4" id="searchForm">
             <div class="relative">
                 <input type="text"
                        id="searchInput"
-                       name="searchTerm"
+                       name="search"
                        value="@searchTerm"
-                       oninput="handleSearchInput()"
                        placeholder="🔍 Search harvests, farmers, or locations..."
                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" />
             </div>
@@ -148,7 +147,11 @@
 
 @section Scripts {
     <script>
-        // 1. Purchase Modal Logic
+        // --- CLEANED UP SCRIPTS ---
+        // Removed the Search Timeout and Search Keypress logic.
+        // The form now uses native HTML behavior (Pressing Enter submits the form).
+
+        // Purchase Modal Logic (Unchanged)
         let currentPrice = 0;
         function openPurchaseModal(id, title, price, unit, available) {
             currentPrice = price;

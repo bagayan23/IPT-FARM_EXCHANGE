@@ -22,27 +22,45 @@ namespace FarmExchange.Controllers
         // ==========================================
         public async Task<IActionResult> Browse(string? search, string? category)
         {
+            // Start with the base query
             var query = _context.Harvests
                 .Include(h => h.User)
                 .Where(h => h.Status == "available" && h.QuantityAvailable > 0);
 
+            // Apply Search Filter
             if (!string.IsNullOrEmpty(search))
             {
+                var searchLower = search.ToLower();
+
                 query = query.Where(h =>
-                    h.Title.Contains(search) ||
-                    h.Description!.Contains(search) ||
-                    h.User.LastName.Contains(search) ||
-                    h.User.FirstName.Contains(search) ||
-                    h.User.Location!.Contains(search));
+                    h.Title.ToLower().Contains(searchLower) ||
+                    // Added null check for Description to prevent crashes if description is empty
+                    (h.Description != null && h.Description.ToLower().Contains(searchLower)) ||
+                    h.Category.ToLower().Contains(searchLower) ||
+                    h.User.LastName.ToLower().Contains(searchLower) ||
+                    h.User.FirstName.ToLower().Contains(searchLower) ||
+
+                    // --- THE FIX IS HERE ---
+                    // We manually combine First and Last name so SQL can read it
+                    (h.User.FirstName + " " + h.User.LastName).ToLower().Contains(searchLower) ||
+                    // -----------------------
+
+                    (h.User.Location != null && h.User.Location.ToLower().Contains(searchLower))
+                );
             }
 
+            // Apply Category Filter
             if (!string.IsNullOrEmpty(category) && category != "all")
             {
                 query = query.Where(h => h.Category == category);
             }
 
-            var harvests = await query.OrderByDescending(h => h.CreatedAt).ToListAsync();
+            // Execute the query
+            var harvests = await query
+                .OrderByDescending(h => h.CreatedAt)
+                .ToListAsync();
 
+            // Get current user profile for the View
             var userId = GetCurrentUserId();
             var profile = await _context.Profiles.FindAsync(userId);
 
