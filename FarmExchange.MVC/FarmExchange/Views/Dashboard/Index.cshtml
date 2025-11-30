@@ -75,9 +75,14 @@
         {
             <div class="bg-white rounded-lg shadow-md hover:shadow-lg p-6 mb-8">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4 md:mb-0">Sales Analytics</h2>
+                    <div class="flex flex-col">
+                        <h2 class="text-xl font-semibold text-gray-900">Sales Analytics</h2>
+                        <div id="totalRevenueContainer" class="text-sm text-gray-600 mt-1">
+                            Total Revenue: <span id="totalRevenueValue" class="font-bold text-green-600">$0.00</span>
+                        </div>
+                    </div>
 
-                    <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex flex-col md:flex-row gap-4 mt-4 md:mt-0">
                          <select id="analyticsPeriod" class="border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm text-sm">
                             <option value="hour">Last Hour</option>
                             <option value="day">Last 24 Hours</option>
@@ -105,10 +110,13 @@
                         </div>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">Market Trends: Top Items Sold (Qty)</h3>
+                        <h3 class="text-lg font-medium text-gray-900 mb-4 text-center">Market: Demand vs Supply</h3>
                         <div class="w-full h-64">
                             <canvas id="marketChart"></canvas>
                         </div>
+                        <p class="text-xs text-gray-500 text-center mt-2">
+                            Demand (Sold in selected period) vs Supply (Currently Available)
+                        </p>
                     </div>
                 </div>
             </div>
@@ -239,16 +247,44 @@
                 fetch(url)
                     .then(response => response.json())
                     .then(data => {
+                        updateTotalRevenue(data.personal);
                         renderSalesChart(data.personal);
                         renderMarketChart(data.market);
                     })
                     .catch(error => console.error('Error fetching analytics:', error));
             }
 
+            function updateTotalRevenue(data) {
+                const total = data.reduce((sum, item) => sum + item.totalSales, 0);
+                document.getElementById('totalRevenueValue').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Helper to generate distinct colors
+            function generateColors(count) {
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    const hue = (i * 137.508) % 360; // Use Golden Angle for distribution
+                    colors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+                }
+                return colors;
+            }
+
+            function generateBorderColors(count) {
+                const colors = [];
+                for (let i = 0; i < count; i++) {
+                    const hue = (i * 137.508) % 360;
+                    colors.push(`hsla(${hue}, 70%, 40%, 1)`);
+                }
+                return colors;
+            }
+
             function renderSalesChart(data) {
                 const ctx = document.getElementById('salesChart').getContext('2d');
                 const labels = data.map(item => item.itemName);
                 const salesData = data.map(item => item.totalSales);
+
+                const backgroundColors = generateColors(data.length);
+                const borderColors = generateBorderColors(data.length);
 
                 if (salesChart) salesChart.destroy();
 
@@ -257,10 +293,10 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Total Revenue ($)',
+                            label: 'Revenue ($)',
                             data: salesData,
-                            backgroundColor: 'rgba(22, 163, 74, 0.6)', // green-600
-                            borderColor: 'rgba(22, 163, 74, 1)',
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
                             borderWidth: 1
                         }]
                     },
@@ -290,7 +326,8 @@
             function renderMarketChart(data) {
                 const ctx = document.getElementById('marketChart').getContext('2d');
                 const labels = data.map(item => item.itemName);
-                const quantityData = data.map(item => item.totalQuantity);
+                const demandData = data.map(item => item.demand);
+                const supplyData = data.map(item => item.supply);
 
                 if (marketChart) marketChart.destroy();
 
@@ -298,25 +335,38 @@
                     type: 'bar',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: 'Market Quantity Sold',
-                            data: quantityData,
-                            backgroundColor: 'rgba(59, 130, 246, 0.6)', // blue-500
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1
-                        }]
+                        datasets: [
+                            {
+                                label: 'Demand (Sold)',
+                                data: demandData,
+                                backgroundColor: 'rgba(239, 68, 68, 0.7)', // red-500
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Supply (Available)',
+                                data: supplyData,
+                                backgroundColor: 'rgba(34, 197, 94, 0.7)', // green-500
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
                         scales: {
                             y: {
                                 beginAtZero: true,
-                                title: { display: true, text: 'Quantity Sold (Units)' }
+                                title: { display: true, text: 'Quantity (Units)' }
                             }
                         },
                         plugins: {
-                            legend: { display: false }
+                            legend: { position: 'top' }
                         }
                     }
                 });

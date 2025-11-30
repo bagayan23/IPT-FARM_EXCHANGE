@@ -128,7 +128,8 @@ namespace FarmExchange.Controllers
                 .ToListAsync();
 
             // 2. Market Quantity Data (Only completed transactions, visible to all farmers)
-            var marketData = await _context.Transactions
+            // Get Top Demanded Items
+            var topDemandedItems = await _context.Transactions
                 .Include(t => t.Harvest)
                 .Where(t => t.Status == "completed" &&
                             t.TransactionDate >= filterStartDate &&
@@ -139,9 +140,30 @@ namespace FarmExchange.Controllers
                     ItemName = g.Key,
                     TotalQuantity = g.Sum(t => t.Quantity)
                 })
-                .OrderByDescending(x => x.TotalQuantity) // Show top selling items
-                .Take(10) // Limit to top 10 items to avoid clutter
+                .OrderByDescending(x => x.TotalQuantity)
+                .Take(10)
                 .ToListAsync();
+
+            var itemNames = topDemandedItems.Select(x => x.ItemName).ToList();
+
+            // Get Supply (Available Stock) for these items
+            var marketSupply = await _context.Harvests
+                .Where(h => itemNames.Contains(h.Title) && h.Status == "available")
+                .GroupBy(h => h.Title)
+                .Select(g => new
+                {
+                    ItemName = g.Key,
+                    TotalAvailable = g.Sum(h => h.QuantityAvailable)
+                })
+                .ToListAsync();
+
+            // Merge Demand and Supply
+            var marketData = topDemandedItems.Select(d => new
+            {
+                ItemName = d.ItemName,
+                Demand = d.TotalQuantity,
+                Supply = marketSupply.FirstOrDefault(s => s.ItemName == d.ItemName)?.TotalAvailable ?? 0
+            }).ToList();
 
             return Json(new { personal = personalData, market = marketData });
         }
