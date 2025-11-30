@@ -17,6 +17,7 @@ namespace FarmExchange.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<ForumThread> ForumThreads { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
+        public DbSet<UserAddress> UserAddresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -149,6 +150,18 @@ namespace FarmExchange.Data
                     .WithMany()
                     .HasForeignKey(e => e.AuthorId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // --- 7. USER ADDRESSES CONFIGURATION ---
+            modelBuilder.Entity<UserAddress>(entity =>
+            {
+                entity.ToTable("UserAddresses");
+                entity.HasKey(e => e.AddressID);
+
+                entity.HasOne<Profile>()
+                    .WithMany(p => p.Addresses)
+                    .HasForeignKey(e => e.UserID)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }
