@@ -25,9 +25,20 @@
 
                 @if (User.Identity.IsAuthenticated)
                 {
+                    var userType = User.FindFirst("UserType")?.Value;
+
                     <nav class="hidden md:flex items-center space-x-8">
                         <a asp-controller="Dashboard" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Dashboard</a>
-                        <a asp-controller="Harvest" asp-action="Browse" class="text-sm font-medium text-gray-700 hover:text-green-600">Browse</a>
+
+                        @if (userType == "Farmer")
+                        {
+                            <a asp-controller="Harvest" asp-action="Manage" class="text-sm font-medium text-gray-700 hover:text-green-600">Manage Harvests</a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Harvest" asp-action="Browse" class="text-sm font-medium text-gray-700 hover:text-green-600">Browse</a>
+                        }
+
                         <a asp-controller="Community" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Community</a>
                         <a asp-controller="Message" asp-action="Index" class="text-sm font-medium text-gray-700 hover:text-green-600">Messages</a>
                     </nav>
