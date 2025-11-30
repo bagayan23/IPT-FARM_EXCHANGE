@@ -44,7 +44,9 @@
                     </nav>
 
                     <div class="hidden md:flex items-center space-x-4">
-                        <span class="text-sm text-gray-700">@User.Identity.Name</span>
+                        <a asp-controller="Profile" asp-action="Edit" class="text-sm text-gray-700 hover:text-green-600 font-semibold" title="Edit Profile">
+                            @User.Identity.Name
+                        </a>
 
                         <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
                             <button type="submit" class="px-3 py-1.5 text-sm font-medium bg-transparent hover:bg-gray-50 text-gray-700 border-2 border-gray-300 rounded-lg">
