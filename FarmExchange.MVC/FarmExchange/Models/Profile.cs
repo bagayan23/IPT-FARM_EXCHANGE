@@ -66,9 +66,6 @@ namespace FarmExchange.Models
         [StringLength(20)]
         public string? Phone { get; set; }
 
-        [StringLength(1000)]
-        public string? Bio { get; set; }
-
         [StringLength(500)]
         public string? AvatarUrl { get; set; }
 

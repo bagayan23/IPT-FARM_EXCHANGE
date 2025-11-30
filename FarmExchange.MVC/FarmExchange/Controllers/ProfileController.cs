@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FarmExchange.Data;
 using FarmExchange.Models;
+using FarmExchange.ViewModels; // Added
 
 namespace FarmExchange.Controllers
 {
@@ -41,18 +42,41 @@ namespace FarmExchange.Controllers
         public async Task<IActionResult> Edit()
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-            var profile = await _context.Profiles.FindAsync(userId);
+            var profile = await _context.Profiles
+                .Include(p => p.Addresses)
+                .FirstOrDefaultAsync(p => p.Id == userId);
 
             if (profile == null) return NotFound();
 
-            return View(profile);
+            var currentAddress = profile.Addresses.FirstOrDefault();
+
+            var viewModel = new EditProfileViewModel
+            {
+                FirstName = profile.FirstName,
+                LastName = profile.LastName,
+                MiddleName = profile.MiddleName,
+                ExtensionName = profile.ExtensionName,
+                Phone = profile.Phone,
+
+                // Populate address fields for display (even if we don't bind them back directly without "UpdateAddress" flag)
+                UnitNumber = currentAddress?.UnitNumber,
+                StreetName = currentAddress?.StreetName,
+                Barangay = currentAddress?.Barangay,
+                City = currentAddress?.City,
+                Province = currentAddress?.Province,
+                Region = currentAddress?.Region,
+                PostalCode = currentAddress?.PostalCode
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Profile model)
+        public async Task<IActionResult> Edit(EditProfileViewModel model)
         {
             var userId = Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+
             
             // Verify the user is editing their own profile
             if (model.Id != userId)
@@ -62,33 +86,52 @@ namespace FarmExchange.Controllers
 
             var profile = await _context.Profiles.FindAsync(userId);
 
+
             if (profile == null) return NotFound();
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    profile.FirstName = model.FirstName;
-                    profile.LastName = model.LastName;
-                    profile.MiddleName = model.MiddleName;
-                    profile.ExtensionName = model.ExtensionName;
-                    profile.Phone = model.Phone;
-                    profile.Bio = model.Bio;
-                    profile.UpdatedAt = DateTime.UtcNow;
 
-                    _context.Profiles.Update(profile);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Profile updated successfully!";
-                    return RedirectToAction("Details", new { id = userId });
-                }
-                catch (Exception ex)
+                // 1. Update Profile Info
+                profile.FirstName = model.FirstName;
+                profile.LastName = model.LastName;
+                profile.MiddleName = model.MiddleName;
+                profile.ExtensionName = model.ExtensionName;
+                profile.Phone = model.Phone;
+
+                // 2. Update Address if requested
+                if (model.UpdateAddress)
                 {
-                    TempData["Error"] = "An error occurred while saving your profile. Please try again.";
-                    ModelState.AddModelError("", "An error occurred while saving your profile. Please try again.");
+                    // Clear existing addresses (Simplification: User has 1 address)
+                    // Or find the first one
+                    var address = profile.Addresses.FirstOrDefault();
+                    if (address == null)
+                    {
+                        address = new UserAddress { UserID = userId };
+                        _context.UserAddresses.Add(address);
+                    }
+
+                    address.UnitNumber = model.UnitNumber;
+                    address.StreetName = model.StreetName;
+                    address.Barangay = model.Barangay;
+                    address.City = model.City;
+                    address.Province = model.Province;
+                    address.Region = model.Region;
+                    address.PostalCode = model.PostalCode;
+
+                    // Update Legacy Location String
+                    profile.Location = string.IsNullOrEmpty(model.Province)
+                        ? $"{model.Barangay}, {model.City}, {model.Region}"
+                        : $"{model.Barangay}, {model.City}, {model.Province}";
                 }
+
+                profile.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Details", new { id = userId });
             }
 
-            return View(profile);
+            return View(model);
         }
     }
 }
