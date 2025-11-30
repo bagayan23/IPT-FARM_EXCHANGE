@@ -1,0 +1,97 @@
+@model FarmExchange.Models.ForumThread
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = Model.Title;
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+            <a asp-action="Index" class="text-green-600 hover:text-green-800 font-medium flex items-center mb-4">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Discussions
+            </a>
+        </div>
+
+        <!-- Thread Header/Original Post -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        @Model.Category
+                    </span>
+                    <span class="text-sm text-gray-500">@Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</span>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-4">@Model.Title</h1>
+
+                <div class="flex items-center mb-6 pb-6 border-b border-gray-100">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-200 flex items-center justify-center text-green-700 font-bold text-lg">
+                        @Model.Author.FirstName[0]@Model.Author.LastName[0]
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-gray-900">@Model.Author.FullName</p>
+                        <p class="text-xs text-gray-500">Author</p>
+                    </div>
+                </div>
+
+                <div class="prose max-w-none text-gray-800">
+                    @Html.Raw(Model.Content.Replace("\n", "<br>"))
+                </div>
+            </div>
+        </div>
+
+        <!-- Replies Section -->
+        <div class="space-y-6 mb-8">
+            <h2 class="text-xl font-bold text-gray-900">Replies (@Model.Posts.Count)</h2>
+
+            @if (!Model.Posts.Any())
+            {
+                <div class="text-center py-8 text-gray-500 bg-white rounded-lg shadow-sm border border-gray-100">
+                    No replies yet. Be the first to share your thoughts!
+                </div>
+            }
+
+            @foreach (var post in Model.Posts.OrderBy(p => p.CreatedAt))
+            {
+                <div class="bg-white rounded-lg shadow-sm p-6 @(post.AuthorId.ToString() == currentUserId ? "border-l-4 border-green-500" : "")">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-700 font-bold">
+                                @post.Author.FirstName[0]@post.Author.LastName[0]
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">@post.Author.FullName</p>
+                                <p class="text-xs text-gray-500">@post.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy h:mm tt")</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-gray-700">
+                        @Html.Raw(post.Content.Replace("\n", "<br>"))
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Reply Form -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Leave a Reply</h3>
+                <form asp-action="Reply" method="post">
+                    <input type="hidden" name="threadId" value="@Model.Id" />
+                    <div class="mb-4">
+                        <textarea name="content" rows="4" class="w-full border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500" placeholder="Type your reply here..." required></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-md">
+                            Post Reply
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
