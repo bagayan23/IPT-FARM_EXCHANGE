@@ -223,6 +223,9 @@ namespace FarmExchange.Controllers
                 existingHarvest.ImageUrl = "/uploads/" + uniqueFileName;
             }
 
+            // Check if restocking (quantity increasing from sold_out state)
+            var wasRestocked = existingHarvest.Status == "sold_out" && harvest.QuantityAvailable > existingHarvest.QuantityAvailable;
+
             existingHarvest.Title = harvest.Title;
             existingHarvest.Description = harvest.Description;
             existingHarvest.Category = harvest.Category;
@@ -230,6 +233,7 @@ namespace FarmExchange.Controllers
             existingHarvest.Unit = harvest.Unit;
             existingHarvest.QuantityAvailable = harvest.QuantityAvailable;
 
+            // Update status based on quantity
             if (existingHarvest.QuantityAvailable > 0 && existingHarvest.Status == "sold_out")
             {
                 existingHarvest.Status = "available";
@@ -243,6 +247,17 @@ namespace FarmExchange.Controllers
             existingHarvest.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+
+            // Set success message
+            if (wasRestocked)
+            {
+                TempData["Success"] = "Harvest restocked successfully! It will now appear in buyer's browse listings.";
+            }
+            else
+            {
+                TempData["Success"] = "Harvest updated successfully!";
+            }
+
             return RedirectToAction("Manage");
         }
 

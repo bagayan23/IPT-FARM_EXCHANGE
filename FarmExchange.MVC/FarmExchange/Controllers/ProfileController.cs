@@ -78,10 +78,12 @@ namespace FarmExchange.Controllers
                 {
                     _context.Profiles.Update(profile);
                     await _context.SaveChangesAsync();
+                    TempData["Success"] = "Profile updated successfully!";
                     return RedirectToAction("Details", new { id = userId });
                 }
                 catch (Exception ex)
                 {
+                    TempData["Error"] = "An error occurred while saving your profile. Please try again.";
                     ModelState.AddModelError("", "An error occurred while saving your profile. Please try again.");
                 }
             }

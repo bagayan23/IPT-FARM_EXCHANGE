@@ -3,10 +3,49 @@
 @{
     ViewData["Title"] = Model.FullName;
     var activeHarvests = ViewBag.ActiveHarvests as List<Harvest> ?? new List<Harvest>();
+    var successMessage = TempData["Success"] as string;
 }
 
 <div class="min-h-screen bg-gray-50 py-8 px-4">
     <div class="max-w-7xl mx-auto">
+
+        <!-- Profile Update Success Modal -->
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div id="profileUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center transform transition-all">
+                    <div class="mb-4">
+                        <svg class="h-16 w-16 text-green-600 mx-auto animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Profile Updated!</h3>
+                    <p class="text-gray-600 mb-6">
+                        Your profile has been successfully updated.
+                    </p>
+                    <div class="space-y-3">
+                        <p class="text-sm text-green-600 font-medium">
+                            ✓ All changes saved
+                        </p>
+                        <p class="text-sm text-green-600 font-medium">
+                            ✓ Profile is live
+                        </p>
+                        <p class="text-sm text-green-600 font-medium">
+                            ✓ Ready to use
+                        </p>
+                    </div>
+                    <button onclick="closeProfileUpdateModal()" class="mt-8 w-full px-6 py-3 text-base font-medium bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg rounded-lg">
+                        Got it!
+                    </button>
+                    
+                    <!-- Progress Bar for Auto-close -->
+                    <div class="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-green-600 rounded-full" style="width: 100%;"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">This will close automatically in <span id="countdown">60</span>s</p>
+                </div>
+            </div>
+        }
 
         <!-- Profile Header -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
@@ -93,3 +132,61 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        let autoCloseTimer = null;
+        let countdownTimer = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('profileUpdateModal');
+            if (modal) {
+                startAutoClose();
+            }
+        });
+
+        function startAutoClose() {
+            const TOTAL_TIME = 60000; // 60 seconds in milliseconds
+            const UPDATE_INTERVAL = 100; // Update every 100ms for smooth animation
+            let elapsedTime = 0;
+            const progressBar = document.getElementById('progressBar');
+            const countdownElement = document.getElementById('countdown');
+
+            // Update progress bar and countdown
+            countdownTimer = setInterval(function() {
+                elapsedTime += UPDATE_INTERVAL;
+                const percentage = ((TOTAL_TIME - elapsedTime) / TOTAL_TIME) * 100;
+                const secondsRemaining = Math.max(0, Math.ceil((TOTAL_TIME - elapsedTime) / 1000));
+                
+                if (progressBar) {
+                    progressBar.style.width = percentage + '%';
+                }
+                
+                if (countdownElement) {
+                    countdownElement.textContent = secondsRemaining;
+                }
+
+                if (elapsedTime >= TOTAL_TIME) {
+                    clearInterval(countdownTimer);
+                    closeProfileUpdateModal();
+                }
+            }, UPDATE_INTERVAL);
+
+            // Auto-close after 60 seconds
+            autoCloseTimer = setTimeout(function() {
+                closeProfileUpdateModal();
+            }, TOTAL_TIME);
+        }
+
+        function closeProfileUpdateModal() {
+            const modal = document.getElementById('profileUpdateModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            
+            // Clear timers
+            if (autoCloseTimer) clearTimeout(autoCloseTimer);
+            if (countdownTimer) clearInterval(countdownTimer);
+        }
+    </script>
+}
