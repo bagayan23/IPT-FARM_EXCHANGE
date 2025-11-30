@@ -82,6 +82,28 @@
             <div class="lg:col-span-3 space-y-6">
                 @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
                 {
+                     @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
+                    {
+                        <!-- Market Insights for Farmer -->
+                        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                Market Insights: High Demand Crops
+                            </h2>
+                            <p class="text-gray-600 mb-4 text-sm">Based on current market trends in the Philippines, these crops are currently in high demand. Consider planting these for better profitability.</p>
+
+                            <div id="market-suggestions" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Loaded via API -->
+                                <div class="col-span-full text-center py-4">
+                                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                                    <span class="ml-2 text-gray-500">Loading market data...</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
                     @if (activeHarvests.Any())
                     {
@@ -224,5 +246,49 @@
             if (autoCloseTimer) clearTimeout(autoCloseTimer);
             if (countdownTimer) clearInterval(countdownTimer);
         }
+
+        // Fetch Market Suggestions
+        document.addEventListener('DOMContentLoaded', function() {
+            const marketContainer = document.getElementById('market-suggestions');
+            if (marketContainer) {
+                fetch('/api/market/demand')
+                    .then(response => response.json())
+                    .then(data => {
+                        marketContainer.innerHTML = '';
+                        if (data && data.length > 0) {
+                            data.forEach(crop => {
+                                const trendColor = crop.priceTrend === 'Up' ? 'text-green-600' : (crop.priceTrend === 'Down' ? 'text-red-600' : 'text-gray-600');
+                                const trendIcon = crop.priceTrend === 'Up' ? '↑' : (crop.priceTrend === 'Down' ? '↓' : '→');
+
+                                const card = `
+                                    <div class="border rounded-lg p-3 hover:shadow-md transition-shadow bg-gray-50">
+                                        <div class="flex items-center space-x-3">
+                                            <img src="${crop.imageUrl}" alt="${crop.name}" class="h-12 w-12 rounded-full object-cover bg-gray-200">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 truncate">
+                                                    ${crop.name}
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    Demand: <span class="font-semibold text-green-700">${crop.demand}</span>
+                                                </p>
+                                                <p class="text-xs text-gray-500">
+                                                    Trend: <span class="${trendColor} font-bold">${trendIcon} ${crop.priceTrend}</span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                marketContainer.insertAdjacentHTML('beforeend', card);
+                            });
+                        } else {
+                            marketContainer.innerHTML = '<p class="text-gray-500 col-span-full">No market data available at the moment.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching market data:', error);
+                        marketContainer.innerHTML = '<p class="text-red-500 col-span-full text-sm">Failed to load market suggestions. Please try again later.</p>';
+                    });
+            }
+        });
     </script>
 }
