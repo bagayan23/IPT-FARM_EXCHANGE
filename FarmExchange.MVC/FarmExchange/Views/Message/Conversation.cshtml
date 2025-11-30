@@ -1,0 +1,87 @@
+@model List<Message>
+@{
+    var currentUser = ViewBag.CurrentUser as Profile;
+    var partner = ViewBag.Partner as Profile;
+    ViewData["Title"] = "Conversation with " + partner.FullName;
+}
+
+<div class="min-h-screen bg-gray-50 py-8 px-4">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[80vh]">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <div class="flex items-center">
+                    <a asp-action="Index" class="mr-4 text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                            @partner.FirstName[0]@partner.LastName[0]
+                        </div>
+                        <div class="ml-3">
+                            <h2 class="text-lg font-bold text-gray-900">@partner.FullName</h2>
+                            <p class="text-xs text-gray-500">@partner.UserType</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50" id="messagesContainer">
+                @if (!Model.Any())
+                {
+                    <div class="text-center text-gray-500 py-10">
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var message in Model)
+                    {
+                        var isMe = message.SenderId == currentUser.Id;
+                        <div class="flex @(isMe ? "justify-end" : "justify-start")">
+                            <div class="max-w-[70%] @(isMe ? "bg-green-600 text-white" : "bg-white text-gray-900 border border-gray-200") rounded-lg px-4 py-3 shadow-sm">
+                                <p class="text-sm font-semibold mb-1 @(isMe ? "text-green-100" : "text-gray-500")">
+                                    @message.Subject
+                                </p>
+                                <p class="text-sm whitespace-pre-wrap">@message.Content</p>
+                                <div class="mt-1 text-xs @(isMe ? "text-green-100" : "text-gray-400") text-right">
+                                    @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Compose Area -->
+            <div class="p-4 bg-white border-t border-gray-200">
+                <form asp-action="Send" method="post" class="flex flex-col gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="recipientId" value="@partner.Id" />
+                    <input type="text" name="subject" placeholder="Subject (Optional)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" />
+                    <div class="flex gap-2">
+                        <textarea name="content" rows="2" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" required></textarea>
+                        <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow transition-colors flex items-center justify-center">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Scroll to bottom of messages container
+        document.addEventListener('DOMContentLoaded', function() {
+            var container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
+        });
+    </script>
+}
