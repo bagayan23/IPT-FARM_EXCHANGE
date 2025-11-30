@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FarmExchange.Data;
+using FarmExchange.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FarmExchange.Data;
-using FarmExchange.Models;
 using System.Security.Claims;
 
 namespace FarmExchange.Controllers

@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using FarmExchange.Data;
+﻿using FarmExchange.Data;
 using FarmExchange.Models;
 using FarmExchange.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace FarmExchange.Controllers
@@ -39,7 +39,8 @@ namespace FarmExchange.Controllers
 
             var conversations = allMessages
                 .GroupBy(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
-                .Select(g => {
+                .Select(g =>
+                {
                     var partnerId = g.Key;
                     var lastMessage = g.OrderByDescending(m => m.CreatedAt).First();
                     var unreadCount = g.Count(m => m.RecipientId == userId && !m.IsRead);

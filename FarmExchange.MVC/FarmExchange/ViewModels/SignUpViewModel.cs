@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using FarmExchange.Models;
+﻿using FarmExchange.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace FarmExchange.ViewModels
 {

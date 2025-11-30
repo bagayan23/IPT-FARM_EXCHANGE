@@ -1,8 +1,8 @@
+using FarmExchange.Data;
+using FarmExchange.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FarmExchange.Data;
-using FarmExchange.Models;
 using System.Security.Claims;
 
 namespace FarmExchange.Controllers
@@ -134,7 +134,7 @@ namespace FarmExchange.Controllers
                 thread.Title = model.Title;
                 thread.Category = model.Category;
                 thread.Content = model.Content;
-                
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Thread", new { id = thread.Id });
             }

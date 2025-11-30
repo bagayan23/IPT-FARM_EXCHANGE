@@ -1,4 +1,3 @@
-using FarmExchange.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace FarmExchange.Data

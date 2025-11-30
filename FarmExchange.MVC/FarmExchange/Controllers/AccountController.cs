@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using FarmExchange.Data;
+using FarmExchange.Models;
+using FarmExchange.ViewModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using FarmExchange.Data;
-using FarmExchange.Models;
-using FarmExchange.ViewModels;
 // Add this for BCrypt
-using BCrypt.Net;
 
 namespace FarmExchange.Controllers
 {

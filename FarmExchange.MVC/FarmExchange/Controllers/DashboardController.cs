@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FarmExchange.Data;
+using FarmExchange.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FarmExchange.Data;
-using FarmExchange.Models;
 using System.Security.Claims;
 
 namespace FarmExchange.Controllers
@@ -130,7 +130,7 @@ namespace FarmExchange.Controllers
 
             if (endDate.HasValue && endDate.Value.TimeOfDay == TimeSpan.Zero)
             {
-                 filterEndDate = endDate.Value.AddDays(1).AddTicks(-1);
+                filterEndDate = endDate.Value.AddDays(1).AddTicks(-1);
             }
 
             // 1. Personal Sales Data (Only completed transactions, filtered by SellerId)
