@@ -127,6 +127,11 @@ namespace FarmExchange.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Remove navigation properties from validation
+            ModelState.Remove("Author");
+            ModelState.Remove("AuthorId");
+            ModelState.Remove("Posts");
+
             if (ModelState.IsValid)
             {
                 thread.Title = model.Title;
