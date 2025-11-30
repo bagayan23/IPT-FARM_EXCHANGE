@@ -257,6 +257,13 @@
                         }
                     </div>
                 </div>
+                <style>
+                    /* Highlight all following stars when a star is checked or hovered */
+                    .flex-row-reverse input:checked ~ label svg,
+                    .flex-row-reverse label:hover ~ label svg {
+                        color: #fbbf24 !important; /* yellow-400 */
+                    }
+                </style>
 
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2">Comment</label>
