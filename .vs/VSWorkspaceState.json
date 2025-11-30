@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\FarmExchange.MVC",
+    "\\FarmExchange.MVC\\Controllers",
+    "\\FarmExchange.MVC\\obj",
+    "\\FarmExchange.MVC\\SQL",
+    "\\FarmExchange.MVC\\ViewModels",
+    "\\FarmExchange.MVC\\Views",
+    "\\FarmExchange.MVC\\Views\\Home",
+    "\\IPT-FARM_EXCHANGE-main\\IPT Project",
+    "\\IPT-FARM_EXCHANGE-main\\IPT Project\\src"
+  ],
+  "SelectedNode": "\\FarmExchange.MVC\\Views\\Home\\Index.cshtml",
+  "PreviewInSolutionExplorer": false
+}
