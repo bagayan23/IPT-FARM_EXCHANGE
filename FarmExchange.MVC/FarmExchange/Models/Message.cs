@@ -27,6 +27,10 @@ namespace FarmExchange.Models
 
         public bool IsRead { get; set; } = false;
 
+        public bool IsDeleted { get; set; } = false;
+
+        public bool IsEdited { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("SenderId")]
