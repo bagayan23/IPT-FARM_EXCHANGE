@@ -72,6 +72,26 @@ namespace FarmExchange.Controllers
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync();
 
+            bool needsSave = false;
+            foreach (var h in harvests)
+            {
+                if (h.QuantityAvailable > 0 && h.Status == "sold_out")
+                {
+                    h.Status = "available";
+                    needsSave = true;
+                }
+                else if (h.QuantityAvailable == 0 && h.Status == "available")
+                {
+                    h.Status = "sold_out";
+                    needsSave = true;
+                }
+            }
+
+            if (needsSave)
+            {
+                await _context.SaveChangesAsync();
+            }
+
             // B. Get Incoming Orders (Pending)
             var incomingOrders = await _context.Transactions
                 .Include(t => t.Harvest)
@@ -211,6 +231,16 @@ namespace FarmExchange.Controllers
             existingHarvest.Price = harvest.Price;
             existingHarvest.Unit = harvest.Unit;
             existingHarvest.QuantityAvailable = harvest.QuantityAvailable;
+
+            if (existingHarvest.QuantityAvailable > 0 && existingHarvest.Status == "sold_out")
+            {
+                existingHarvest.Status = "available";
+            }
+            else if (existingHarvest.QuantityAvailable == 0)
+            {
+                existingHarvest.Status = "sold_out";
+            }
+
             existingHarvest.HarvestDate = harvest.HarvestDate;
             existingHarvest.UpdatedAt = DateTime.UtcNow;
 
