@@ -90,7 +90,6 @@ namespace FarmExchange.Controllers
                 profile.MiddleName = model.MiddleName;
                 profile.ExtensionName = model.ExtensionName;
                 profile.Phone = model.Phone;
-                // Bio Removed as requested
 
                 // 2. Update Address if requested
                 if (model.UpdateAddress)
