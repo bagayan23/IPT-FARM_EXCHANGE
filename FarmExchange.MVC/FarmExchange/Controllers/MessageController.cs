@@ -116,6 +116,61 @@ namespace FarmExchange.Controllers
             return View(message);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var message = await _context.Messages.FindAsync(id);
+
+            if (message == null || message.SenderId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            return View(message);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, string subject, string content)
+        {
+            var userId = GetCurrentUserId();
+            var message = await _context.Messages.FindAsync(id);
+
+            if (message == null || message.SenderId != userId)
+            {
+                return RedirectToAction("Index");
+            }
+
+            if (!string.IsNullOrEmpty(subject) && !string.IsNullOrEmpty(content))
+            {
+                message.Subject = subject;
+                message.Content = content;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Message updated successfully!";
+                return RedirectToAction("Details", new { id = message.Id });
+            }
+
+            return View(message);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var userId = GetCurrentUserId();
+            var message = await _context.Messages.FindAsync(id);
+
+            if (message != null && message.SenderId == userId)
+            {
+                _context.Messages.Remove(message);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Message deleted successfully!";
+            }
+
+            return RedirectToAction("Index");
+        }
+
         private Guid GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
