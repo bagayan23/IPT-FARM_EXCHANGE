@@ -68,9 +68,11 @@
                     
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
-                        <div class="mb-2">
-                            <p class="text-xs text-gray-500 mb-1">Current Image:</p>
-                            <img src="@Model.ImageUrl" alt="Current Harvest Image" class="h-32 w-32 object-cover rounded-lg border border-gray-200" />
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 mb-2">Current Image:</p>
+                            <div class="inline-block rounded-lg border-4 border-white shadow-lg overflow-hidden">
+                                <img src="@Model.ImageUrl" alt="Current Harvest Image" class="h-64 w-64 object-cover bg-gray-100" />
+                            </div>
                         </div>
                     }
 
