@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "ContainingType": "FarmExchange.Controllers.MarketApiController",
+    "Method": "GetMarketDemand",
+    "RelativePath": "api/market/demand",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

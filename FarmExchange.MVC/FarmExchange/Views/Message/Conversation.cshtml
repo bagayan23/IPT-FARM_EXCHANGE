@@ -1,407 +1,178 @@
-﻿@model FarmExchange.Models.Profile
-
+﻿@using System.Text.Encodings.Web
+@model List<Message>
 @{
-    ViewData["Title"] = Model.FullName;
-    var activeHarvests = ViewBag.ActiveHarvests as List<Harvest> ?? new List<Harvest>();
-    var successMessage = TempData["Success"] as string;
+    var currentUser = ViewBag.CurrentUser as Profile;
+    var partner = ViewBag.Partner as Profile;
+    ViewData["Title"] = "Conversation with " + partner.FullName;
 }
 
 <div class="min-h-screen bg-gray-50 py-8 px-4">
-
-    <div class="w-full px-4 mx-auto">
-
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div id="profileUpdateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center transform transition-all">
-                    <div class="mb-4">
-                        <svg class="h-16 w-16 text-green-600 mx-auto animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[80vh]">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <div class="flex items-center">
+                    <a asp-action="Index" class="mr-4 text-gray-500 hover:text-gray-700">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
+                    </a>
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                            @partner.FirstName[0]@partner.LastName[0]
+                        </div>
+                        <div class="ml-3">
+                            <h2 class="text-lg font-bold text-gray-900">@partner.FullName</h2>
+                            <p class="text-xs text-gray-500">@partner.UserType</p>
+                        </div>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Profile Updated!</h3>
-                    <p class="text-gray-600 mb-6">Your profile has been successfully updated.</p>
-                    <button onclick="closeProfileUpdateModal()" class="mt-8 w-full px-6 py-3 text-base font-medium bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg rounded-lg">
-                        Got it!
-                    </button>
-                    <div class="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
-                        <div id="progressBar" class="h-full bg-green-600 rounded-full" style="width: 100%;"></div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2">This will close automatically in <span id="countdown">5</span>s</p>
                 </div>
             </div>
-        }
 
-        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8 w-full">
-            <div class="h-32 bg-green-600"></div>
-            <div class="px-6 pb-6">
-                <div class="relative flex flex-col md:flex-row justify-between items-end -mt-12 mb-4">
-                    <div class="flex items-end w-full">
-                        <div class="h-32 w-48 rounded-xl border-4 border-white bg-green-600 flex items-center justify-center shadow-lg shrink-0 z-10 relative">
-                            <span class="text-4xl font-bold text-white leading-none select-none">
-                                @Model.FirstName[0]@Model.LastName[0]
-                            </span>
-                        </div>
-
-                        <div class="ml-4 mb-1 flex-1">
-                            <h1 class="text-2xl font-bold text-gray-900">@Model.FullName</h1>
-                            <p class="text-sm text-gray-600">@Model.UserType • Joined @Model.CreatedAt.ToString("MMMM yyyy")</p>
-                            <div class="flex items-center text-gray-600 mt-1">
-                                <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span class="text-sm">@(string.IsNullOrEmpty(Model.Location) ? "Location not specified" : Model.Location)</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
-                    {
-                        <div class="mt-4 md:mt-0 md:mb-2 flex-shrink-0">
-                            <a asp-controller="Profile" asp-action="Edit" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:text-gray-500 focus:outline-none transition ease-in-out duration-150">
-                                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                </svg>
-                                Edit Profile
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="w-full">
-            @if (Model.UserType == FarmExchange.Models.UserType.Farmer)
-            {
-                <div class="mb-4 border-b pb-2">
-                    <h2 class="text-2xl font-bold text-gray-900">Active Listings</h2>
-                </div>
-                @if (activeHarvests.Any())
+            <div class="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50" id="messagesContainer">
+                @if (!Model.Any())
                 {
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
-                        @foreach (var harvest in activeHarvests)
-                        {
-                            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden border border-gray-100 group">
-                                <div class="h-48 w-full bg-gray-100 relative overflow-hidden">
-                                    @if (!string.IsNullOrEmpty(harvest.ImageUrl))
-                                    {
-                                        <img src="@harvest.ImageUrl" alt="@harvest.Title" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
-                                    }
-                                    else
-                                    {
-                                        <div class="flex items-center justify-center h-full bg-green-50 text-green-200">
-                                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                    }
-                                    <span class="absolute top-2 right-2 px-2.5 py-1 text-xs font-bold bg-white/90 text-green-700 rounded-full shadow-sm backdrop-blur-sm">
-                                        @harvest.Category
-                                    </span>
-                                </div>
-                                <div class="p-4 flex flex-col flex-1">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h3 class="text-lg font-bold text-gray-900 line-clamp-1" title="@harvest.Title">@harvest.Title</h3>
-                                    </div>
-                                    <div class="flex items-baseline mb-3">
-                                        <span class="text-xl font-bold text-green-600">₱@harvest.Price.ToString("F2")</span>
-                                        <span class="text-sm text-gray-500 ml-1">/@harvest.Unit</span>
-                                    </div>
-                                    <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
-                                        <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
-                                            @harvest.QuantityAvailable @harvest.Unit left
-                                        </span>
-                                        <a asp-controller="Harvest" asp-action="Edit" asp-route-id="@harvest.Id" class="text-sm font-medium text-green-600 hover:text-green-800 hover:underline">Details →</a>
-                                    </div>
-                                </div>
-                            </div>
-                        }
+                    <div class="text-center text-gray-500 py-10">
+                        <p>No messages yet. Start the conversation!</p>
                     </div>
                 }
                 else
                 {
-                    <div class="bg-white rounded-lg p-12 text-center shadow-sm border border-gray-200">
-                        <div class="text-gray-400 mb-3">
-                            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                            </svg>
-                        </div>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No active listings</h3>
-                        <p class="mt-1 text-sm text-gray-500">Get started by adding a new harvest.</p>
-                    </div>
-                }
-            }
-            else if (Model.UserType == FarmExchange.Models.UserType.Buyer)
-            {
-                @if (User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.Id.ToString())
-                {
-                    <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
-                        <h2 class="text-2xl font-bold text-gray-900">My Orders</h2>
-
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <div class="relative flex-1 sm:flex-initial">
-                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                                    <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="orderSearch" onkeyup="filterOrders()" placeholder="Search items..."
-                                       class="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent w-full" />
-                            </div>
-
-                            <select id="statusFilter" onchange="filterOrders()" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white">
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    @if (Model.BuyerTransactions != null && Model.BuyerTransactions.Any())
+                    @foreach (var message in Model)
                     {
-                        <div id="ordersGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 w-full">
-                            @foreach (var order in Model.BuyerTransactions.OrderByDescending(t => t.TransactionDate))
-                            {
-                                <div class="order-card bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow border border-gray-200"
-                                     data-title="@(order.Harvest?.Title?.ToLower() ?? "")"
-                                     data-status="@(order.Status?.ToLower() ?? "")">
+                        var isMe = message.SenderId == currentUser.Id;
+                        <div class="group flex @(isMe ? "justify-end" : "justify-start")">
+                            <div class="max-w-[70%] relative">
+                                @if (message.IsEdited && !message.IsDeleted)
+                                {
+                                    <div class="text-[10px] text-gray-400 mb-1 @(isMe ? "text-right" : "text-left")">
+                                        edited
+                                    </div>
+                                }
 
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span class="px-2 py-1 text-xs font-bold rounded-full
-                                                                    @(order.Status == "completed" ? "bg-green-100 text-green-800" :
-                                                                                                    order.Status == "cancelled" ? "bg-red-100 text-red-800" :
-                                                                                                    "bg-yellow-100 text-yellow-800")">
-                                            @order.Status.ToUpper()
+                                <div class="@(isMe ? "bg-green-600 text-white" : "bg-white text-gray-900 border border-gray-200") rounded-lg px-4 py-3 shadow-sm relative group">
+                                    @if (message.IsDeleted)
+                                    {
+                                        <p class="text-sm italic @(isMe ? "text-green-200" : "text-gray-400")">
+                                            @(isMe ? "You" : message.Sender.FirstName) deleted the message
+                                        </p>
+                                    }
+                                    else
+                                    {
+                                        <p class="text-xs font-bold mb-1 @(isMe ? "text-white" : "text-green-600")">
+                                            @(isMe ? "You" : message.Sender.FullName)
+                                        </p>
+                                        <p class="text-sm font-semibold mb-1 @(isMe ? "text-green-100" : "text-gray-500")">
+                                            @message.Subject
+                                        </p>
+                                        <p class="text-sm whitespace-pre-wrap">@message.Content</p>
+                                    }
+
+                                    <div class="mt-2 flex items-center justify-end gap-2">
+                                        @if (isMe && !message.IsDeleted)
+                                        {
+                                            <button onclick="editMessage('@message.Id', '@JavaScriptEncoder.Default.Encode(message.Content)')"
+                                                    class="bg-transparent border-none shadow-none text-green-900 hover:text-white transition-colors p-1 rounded hover:bg-green-700"
+                                                    title="Edit Message">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+
+                                            <form asp-action="Delete" method="post" class="inline-block m-0 p-0" onsubmit="return confirm('Are you sure you want to delete this message?');">
+                                                <input type="hidden" name="id" value="@message.Id" />
+                                                <button type="submit"
+                                                        class="bg-transparent border-none shadow-none text-red-400 hover:text-red-200 transition-colors p-1 rounded hover:bg-green-700"
+                                                        title="Delete Message">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        }
+
+                                        <span class="text-xs ml-1 @(isMe ? "text-green-100" : "text-gray-400")">
+                                            @message.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt")
                                         </span>
-                                        <span class="text-xs text-gray-400">@order.TransactionDate.ToString("MMM d")</span>
-                                    </div>
-
-                                    <h4 class="font-bold text-gray-900 truncate mb-1" title="@(order.Harvest?.Title)">
-                                        @(order.Harvest?.Title ?? "Product Unavailable")
-                                    </h4>
-
-                                    <div class="flex justify-between text-sm text-gray-600 mb-3">
-                                        <span>Qty: @order.Quantity</span>
-                                        <span class="font-semibold text-green-700">₱@order.TotalPrice.ToString("F2")</span>
-                                    </div>
-
-                                    <div class="pt-2 border-t border-gray-100 text-center">
-                                        <button onclick="showReceipt(this)"
-                                                data-id="@order.Id"
-                                                data-date="@order.TransactionDate.ToString("MMM dd, yyyy")"
-                                                data-time="@order.TransactionDate.ToString("hh:mm tt")"
-                                                data-item="@(order.Harvest?.Title ?? "Product Unavailable")"
-                                                data-price="@((order.Harvest?.Price ?? 0).ToString("F2"))"
-                                                data-unit="@(order.Harvest?.Unit ?? "units")"
-                                                data-qty="@order.Quantity"
-                                                data-total="@order.TotalPrice.ToString("F2")"
-                                                data-status="@order.Status"
-                                                class="text-xs text-gray-500 hover:text-green-600 font-medium bg-transparent border-none cursor-pointer focus:outline-none flex items-center justify-center gap-1 w-full">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                            View Receipt
-                                        </button>
                                     </div>
                                 </div>
-                            }
-                        </div>
-
-                        <div id="noResultsMsg" class="hidden bg-white rounded-lg p-10 text-center shadow-sm w-full">
-                            <p class="text-gray-500">No orders match your search criteria.</p>
-                            <button onclick="resetFilters()" class="mt-2 text-sm text-green-600 hover:underline">Reset Filters</button>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="bg-white rounded-lg p-10 text-center shadow-sm">
-                            <p class="text-gray-500 italic">No orders found.</p>
+                            </div>
                         </div>
                     }
                 }
-            }
-        </div>
-    </div>
-</div>
-
-<div id="receiptModal" class="fixed inset-0 bg-black/40 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-    <div class="bg-white w-[340px] rounded-2xl shadow-2xl overflow-hidden relative transform transition-all flex flex-col">
-
-        <div class="bg-gray-50 p-6 text-center border-b border-gray-100">
-            <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-3 shadow-sm">
-                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-            </div>
-            <h2 class="text-lg font-bold text-gray-900">Payment Successful</h2>
-            <p class="text-xs text-gray-500 mt-1">Order #<span id="receiptId">00000</span></p>
-        </div>
-
-        <div class="p-6 space-y-4">
-            <div class="text-center mb-6">
-                <p class="text-xs text-gray-400 uppercase tracking-wider mb-1">Total Amount</p>
-                <p class="text-3xl font-black text-gray-900">₱<span id="receiptGrandTotal">0.00</span></p>
-                <span id="receiptStatusBadge" class="inline-block mt-2 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-green-100 text-green-700">
-                    Completed
-                </span>
             </div>
 
-            <div class="bg-gray-50 rounded-xl p-4 space-y-3 text-sm">
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Date</span>
-                    <span class="font-medium text-gray-900" id="receiptDate">Dec 01, 2025</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-500">Time</span>
-                    <span class="font-medium text-gray-900" id="receiptTime">12:00 PM</span>
-                </div>
-                <div class="h-px bg-gray-200 my-2"></div>
-                <div class="flex justify-between items-start">
-                    <div class="flex flex-col">
-                        <span class="font-medium text-gray-900" id="receiptItem">Product</span>
-                        <span class="text-xs text-gray-500">
-                            <span id="receiptQty">0</span> x ₱<span id="receiptPrice">0.00</span>/<span id="receiptUnit">kg</span>
-                        </span>
+            <div id="editMessageModal" class="fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 relative transform transition-all">
+
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-900">Edit Message</h3>
+                        <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
-                    <span class="font-bold text-gray-900">₱<span id="receiptTotal">0.00</span></span>
+
+                    <form asp-action="Edit" method="post" class="space-y-4">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="editMessageId" name="id" />
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Content</label>
+                            <textarea id="editMessageContent" name="content" rows="6"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none text-base"
+                                      required></textarea>
+                        </div>
+
+                        <div class="flex justify-end gap-3 mt-6 pt-2 border-t border-gray-100">
+                            <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg shadow-sm">
+                                Cancel
+                            </button>
+                            <button type="submit" class="px-5 py-2.5 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-md">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </div>
 
-        <div class="p-6 pt-0 flex gap-3">
-            <button onclick="window.print()" class="flex-1 flex items-center justify-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm">
-                <svg class="w-3 h-3 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Print
-            </button>
-            <button onclick="closeReceipt()" class="flex-1 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-xl transition-colors">
-                Close
-            </button>
+            <div class="p-4 bg-white border-t border-gray-200">
+                <form asp-action="Send" method="post" class="flex flex-col gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="recipientId" value="@partner.Id" />
+                    <input type="text" name="subject" placeholder="Subject (Optional)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm" />
+                    <div class="flex gap-2">
+                        <textarea name="content" rows="2" placeholder="Type your message..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none" required></textarea>
+                        <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow transition-colors flex items-center justify-center">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
-        // --- Existing Modal Logic ---
-        let autoCloseTimer = null;
-        let countdownTimer = null;
-
+        // Auto-scroll
         document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('profileUpdateModal');
-            if (modal) startAutoClose();
+            var container = document.getElementById('messagesContainer');
+            container.scrollTop = container.scrollHeight;
         });
 
-        function startAutoClose() {
-            const TOTAL_TIME = 5000;
-            const UPDATE_INTERVAL = 100;
-            let elapsedTime = 0;
-            const progressBar = document.getElementById('progressBar');
-            const countdownElement = document.getElementById('countdown');
-
-            countdownTimer = setInterval(function() {
-                elapsedTime += UPDATE_INTERVAL;
-                const percentage = ((TOTAL_TIME - elapsedTime) / TOTAL_TIME) * 100;
-                const secondsRemaining = Math.max(0, Math.ceil((TOTAL_TIME - elapsedTime) / 1000));
-                if (progressBar) progressBar.style.width = percentage + '%';
-                if (countdownElement) countdownElement.textContent = secondsRemaining;
-                if (elapsedTime >= TOTAL_TIME) {
-                    clearInterval(countdownTimer);
-                    closeProfileUpdateModal();
-                }
-            }, UPDATE_INTERVAL);
-
-            autoCloseTimer = setTimeout(function() {
-                closeProfileUpdateModal();
-            }, TOTAL_TIME);
+        // Edit Modal Logic
+        function editMessage(id, content) {
+            document.getElementById('editMessageId').value = id;
+            document.getElementById('editMessageContent').value = content;
+            document.getElementById('editMessageModal').classList.remove('hidden');
+            document.getElementById('editMessageModal').classList.add('flex');
         }
 
-        function closeProfileUpdateModal() {
-            const modal = document.getElementById('profileUpdateModal');
-            if (modal) modal.classList.add('hidden');
-            if (autoCloseTimer) clearTimeout(autoCloseTimer);
-            if (countdownTimer) clearInterval(countdownTimer);
-        }
-
-        // --- Filter Logic ---
-        function filterOrders() {
-            const searchInput = document.getElementById('orderSearch').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-            const cards = document.querySelectorAll('.order-card');
-            const noResultsMsg = document.getElementById('noResultsMsg');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const title = card.getAttribute('data-title');
-                const status = card.getAttribute('data-status');
-                const matchesSearch = title.includes(searchInput);
-                const matchesStatus = statusFilter === 'all' || status === statusFilter;
-
-                if (matchesSearch && matchesStatus) {
-                    card.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    card.classList.add('hidden');
-                }
-            });
-
-            if (visibleCount === 0 && cards.length > 0) {
-                noResultsMsg.classList.remove('hidden');
-            } else if (noResultsMsg) {
-                noResultsMsg.classList.add('hidden');
-            }
-        }
-
-        function resetFilters() {
-            document.getElementById('orderSearch').value = '';
-            document.getElementById('statusFilter').value = 'all';
-            filterOrders();
-        }
-
-        // --- Receipt Card Logic ---
-        function showReceipt(btn) {
-            const id = btn.getAttribute('data-id');
-            const date = btn.getAttribute('data-date');
-            const time = btn.getAttribute('data-time');
-            const item = btn.getAttribute('data-item');
-            const price = btn.getAttribute('data-price');
-            const unit = btn.getAttribute('data-unit');
-            const qty = btn.getAttribute('data-qty');
-            const total = btn.getAttribute('data-total');
-            const status = btn.getAttribute('data-status');
-
-            document.getElementById('receiptId').textContent = id;
-            document.getElementById('receiptDate').textContent = date;
-            document.getElementById('receiptTime').textContent = time;
-            document.getElementById('receiptItem').textContent = item;
-            document.getElementById('receiptPrice').textContent = price;
-            document.getElementById('receiptUnit').textContent = unit;
-            document.getElementById('receiptQty').textContent = qty;
-            document.getElementById('receiptTotal').textContent = total;
-            document.getElementById('receiptGrandTotal').textContent = total;
-
-            const badge = document.getElementById('receiptStatusBadge');
-            badge.textContent = status.toUpperCase();
-
-            badge.className = 'inline-block mt-2 px-2 py-0.5 text-[10px] font-bold uppercase rounded-full';
-            if(status === 'completed') {
-                badge.classList.add('bg-green-100', 'text-green-700');
-            } else if (status === 'cancelled') {
-                badge.classList.add('bg-red-100', 'text-red-700');
-            } else {
-                badge.classList.add('bg-yellow-100', 'text-yellow-700');
-            }
-
-            const modal = document.getElementById('receiptModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        }
-
-        function closeReceipt() {
-            const modal = document.getElementById('receiptModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        function closeEditModal() {
+            document.getElementById('editMessageModal').classList.add('hidden');
+            document.getElementById('editMessageModal').classList.remove('flex');
         }
     </script>
 }
