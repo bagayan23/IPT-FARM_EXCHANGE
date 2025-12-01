@@ -146,6 +146,14 @@ namespace FarmExchange.Controllers
 
             if (profile?.UserType != UserType.Farmer) return RedirectToAction("Index", "Dashboard");
 
+            // Validate Unit of Measurement
+            var allowedUnits = new[] { "kg", "lb", "g", "bunch", "dozen", "piece" };
+            if (!allowedUnits.Contains(harvest.Unit))
+            {
+                ModelState.AddModelError("Unit", "Invalid unit of measurement.");
+                return View(harvest);
+            }
+
             // Validate Quantity for specific units
             if (new[] { "bunch", "dozen", "piece" }.Contains(harvest.Unit) && harvest.QuantityAvailable % 1 != 0)
             {
@@ -215,6 +223,14 @@ namespace FarmExchange.Controllers
             var existingHarvest = await _context.Harvests.FindAsync(id);
 
             if (existingHarvest == null || existingHarvest.UserId != userId) return RedirectToAction("Manage");
+
+            // Validate Unit of Measurement
+            var allowedUnits = new[] { "kg", "lb", "g", "bunch", "dozen", "piece" };
+            if (!allowedUnits.Contains(harvest.Unit))
+            {
+                ModelState.AddModelError("Unit", "Invalid unit of measurement.");
+                return View(harvest);
+            }
 
             // Validate Quantity for specific units
             if (new[] { "bunch", "dozen", "piece" }.Contains(harvest.Unit) && harvest.QuantityAvailable % 1 != 0)
