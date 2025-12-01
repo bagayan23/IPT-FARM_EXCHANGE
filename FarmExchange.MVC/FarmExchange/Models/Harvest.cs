@@ -25,6 +25,7 @@ namespace FarmExchange.Models
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero.")]
         public decimal Price { get; set; }
 
         [Required]
@@ -33,6 +34,7 @@ namespace FarmExchange.Models
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
+        [Range(0, double.MaxValue, ErrorMessage = "Quantity must be non-negative.")]
         public decimal QuantityAvailable { get; set; }
 
         [StringLength(500)]
